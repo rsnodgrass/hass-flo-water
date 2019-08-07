@@ -20,7 +20,9 @@ Visit the Home Assistant community if you need [help with installation and confi
 
 ### Step 1: Install Flo Custom Components
 
-Copy all the files in [flo/](https://github.com/rsnodgrass/hass-flo-water/custom_components/flo) GitHub directory to `/config/custom_components/flo` on your Home Assistant installation.
+Easiest installation is by setting up [HACS](https://github.com/custom-components/hacs), and then adding the "Integration" repository: rsnodgrass/hass-flo-water.
+
+However you can also manually copy all the files in [flo/](https://github.com/rsnodgrass/hass-flo-water/custom_components/flo) GitHub directory to `/config/custom_components/flo` on your Home Assistant installation.
 
 ```
 __init__.py 
