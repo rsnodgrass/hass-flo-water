@@ -20,16 +20,9 @@ Visit the Home Assistant community if you need [help with installation and confi
 
 ### Step 1: Install Flo Custom Components
 
-Easiest installation is by setting up [HACS](https://github.com/custom-components/hacs), and then adding the "Integration" repository: rsnodgrass/hass-flo-water.
+Easiest installation is by setting up [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs), and then adding the "Integration" repository: rsnodgrass/hass-flo-water.
 
-However you can also manually copy all the files in [flo/](https://github.com/rsnodgrass/hass-flo-water/custom_components/flo) GitHub directory to `/config/custom_components/flo` on your Home Assistant installation.
-
-```
-__init__.py 
-sensor.py
-switch.py
-manifest.json
-```
+However you can also manually copy all the files in [flo/](https://github.com/rsnodgrass/hass-flo-water/custom_components/flo) directory to `/config/custom_components/flo` on your Home Assistant installation.
 
 ### Step 2: Configure Sensors
 
@@ -86,10 +79,6 @@ type: horizontal-stack
 More complex cards can be created, for example the following shows both the basic entities card as well as a card built with mini-graph-card (see flo/lovelace/ folder for example cards):
 
 ![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/mini-graph.png?raw=true)
-
-### Step 4: Configure Automatic Updates (optional)
-
-NOTE: This has been upgraded to support [HACS](https://github.com/custom-components/hacs) as well using the repository: rsnodgrass/hass-flo-water
 
 ## See Also
 
