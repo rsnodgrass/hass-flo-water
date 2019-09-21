@@ -1,5 +1,5 @@
 {
   "name": "Flo Water Control System",
   "domains": ["sensor", "switch"],
-  "render_readme": True
+  "render_readme": true
 }
