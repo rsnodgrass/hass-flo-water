@@ -11,12 +11,10 @@ import logging
 from homeassistant.const import ( TEMP_FAHRENHEIT, ATTR_TEMPERATURE )
 from . import FloService, FloEntity
 
-_LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 ATTR_TIME       = 'time'
 ATTR_TOTAL_FLOW = 'total_flow'
-
-#SCAN_INTERVAL = timedelta(seconds=0.1)
 
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
@@ -30,6 +28,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     #     "device_id": "a0b405bfe487",
     #     "id": "2faf8cd6-a8eb-4b63-bd1a-33298a26eca8",
     #     "location_id": "e7b2833a-f2cb-a4b1-ace2-36c21075d493" }
+    LOG.info(f"Received response {response}")
     json_response = response.json()
     flo_icd_id = json_response['id']
 
@@ -81,7 +80,7 @@ class FloRateSensor(FloEntity):
             ATTR_TOTAL_FLOW  : round(float(json_response['total_flow']),1),
             ATTR_TIME        : json_response['time']
         })
-        _LOGGER.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
 
 class FloTempSensor(FloEntity):
     """Water temp sensor for a Flo device"""
@@ -117,7 +116,7 @@ class FloTempSensor(FloEntity):
         self._attrs.update({
             ATTR_TIME        : json_response['time']
         })
-        _LOGGER.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
 
 
 class FloPressureSensor(FloEntity):
@@ -154,7 +153,7 @@ class FloPressureSensor(FloEntity):
         self._attrs.update({
             ATTR_TIME        : json_response['time']
         })
-        _LOGGER.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
 
 class FloModeSensor(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
@@ -184,4 +183,4 @@ class FloModeSensor(FloEntity):
     
         # FIXME: cache results so that for each sensor don't update multiple times
         json_response = self._flo_service.get_request('/icdalarmnotificationdeliveryrules/scan')
-        _LOGGER.info("Flo alarm notification: " + json_response)
+        LOG.info("Flo alarm notification: " + json_response)
