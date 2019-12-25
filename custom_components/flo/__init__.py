@@ -45,7 +45,8 @@ CONFIG_SCHEMA = vol.Schema({
 
 # cache expiry in minutes; TODO: make this configurable (with a minimum to prevent DDoS)
 FLO_CACHE_EXPIRY=10
-FLO_HOSTNAME="api-gw.meetflo.com" # OLD "api.meetflo.com"
+FLO_HOSTNAME="api.meetflo.com"       # v1 API
+FLO_HOSTNAME_V2="api-gw.meetflo.com" # v2 API
 
 FLO_UNIT_SYSTEMS = {
     'imperial_us': { 
