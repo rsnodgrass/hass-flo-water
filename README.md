@@ -87,11 +87,12 @@ More complex cards can be created, for example the following shows both the basi
 * [Check price of Flo water monitoring device on Amazon.com](https://amzn.to/2WBn8tW?tag=rynoshark-20)
 * [Flo by Moen](https://meetflo.com) (official product page)
 * [15% OFF purchases of Flo](https://meetflo.referralrock.com/l/818758/)
-
+* [pyflowater](https://github.com/rsnodgrass/pyflowater)
 
 ## Known Issues
 
-* Flo accounts with multiple houses currently don't work. Only a single Flo device per account.
+* BUG: Flo accounts with multiple houses currently don't work. Only a single Flo device per account
+* BUG: does not yet support the Flo v2 API
 
 #### Feature Requests
 
