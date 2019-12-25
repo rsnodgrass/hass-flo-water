@@ -122,7 +122,7 @@ class FloService:
             #   POST https://api.meetflo.com/api/v1/users/auth
             #   Payload: {username: "your@email.com", password: "1234"}
 
-            auth_url = f"https://{FLO_HOSTNAME}}/api/v1/users/auth"
+            auth_url = f"https://{FLO_HOSTNAME}/api/v1/users/auth"
             payload = json.dumps({
                 'username': self._username,
                 'password': self._password
