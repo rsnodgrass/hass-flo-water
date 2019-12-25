@@ -7,6 +7,7 @@ FUTURE:
      (one minute after Flo's every 15 minute average rollup)
 """
 import logging
+import json
 
 from homeassistant.const import ( TEMP_FAHRENHEIT, ATTR_TEMPERATURE )
 from . import FloService, FloEntity
@@ -28,7 +29,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     #     "device_id": "a0b405bfe487",
     #     "id": "2faf8cd6-a8eb-4b63-bd1a-33298a26eca8",
     #     "location_id": "e7b2833a-f2cb-a4b1-ace2-36c21075d493" }
-    LOG.info(f"Received response {response}")
+    LOG.info(f"Received content {response.content}")
+    LOG.info(f"UTF8 content {response.content.decode('utf8')}")
+    LOG.info(f"JSON content {response.json()}")
     json_response = response.json()
     flo_icd_id = json_response['id']
 
