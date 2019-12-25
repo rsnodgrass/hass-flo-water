@@ -88,7 +88,12 @@ More complex cards can be created, for example the following shows both the basi
 * [Flo by Moen](https://meetflo.com) (official product page)
 * [15% OFF purchases of Flo](https://meetflo.referralrock.com/l/818758/)
 
-## Feature Requests
+
+## Known Issues
+
+* Flo accounts with multiple houses currently don't work. Only a single Flo device per account.
+
+#### Feature Requests
 
 Priority improvements:
 

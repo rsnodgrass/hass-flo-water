@@ -2,6 +2,8 @@
 Flo Smart Home Water Control System for Home Assistant
 See https://github.com/rsnodgrass/hass-flo-water
 
+NOTE: Split out all Flo service calls to a pyflo Python library.
+
 For good example of update, see Leaf sensor/switch:
 https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/components/nissan_leaf/__init__.py
 
@@ -12,6 +14,10 @@ FUTURE APIS:
 - https://api.meetflo.com/api/v1/locations/me
 - https://api.meetflo.com/api/v1/users/me
 - https://api.meetflo.com/api/v1/userdetails/me
+
+FIXME:
+- https://api-gw.meetflo.com/api/v2/users/9ddb2ced-c495-3874-ac52-b63g3008b6c7?expand=locations,alarmSettings
+- need to get the list of locations from above (to support multiple houses with Flo devices on one account)
 """
 import logging
 import json
@@ -39,6 +45,7 @@ CONFIG_SCHEMA = vol.Schema({
 
 # cache expiry in minutes; TODO: make this configurable (with a minimum to prevent DDoS)
 FLO_CACHE_EXPIRY=10
+FLO_HOSTNAME="api-gw.meetflo.com" # OLD "api.meetflo.com"
 
 FLO_UNIT_SYSTEMS = {
     'imperial_us': { 
@@ -114,7 +121,7 @@ class FloService:
             #   POST https://api.meetflo.com/api/v1/users/auth
             #   Payload: {username: "your@email.com", password: "1234"}
 
-            auth_url = 'https://api.meetflo.com/api/v1/users/auth'
+            auth_url = f"https://{FLO_HOSTNAME}}/api/v1/users/auth"
             payload = json.dumps({
                 'username': self._username,
                 'password': self._password
@@ -142,7 +149,7 @@ class FloService:
         return self._auth_token
 
     def get_request(self, url_path):
-        url = 'https://api.meetflo.com/api/v1' + url_path
+        url = f"https://{FLO_HOSTNAME}/api/v1{url_path}"
         headers = { 
             'authorization': self._flo_authentication_token(), 
             'User-Agent': FLO_USER_AGENT
