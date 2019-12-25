@@ -18,16 +18,24 @@ import json
 import requests
 import time
 from threading import Thread, Lock
+import voluptuous as vol
 
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import ( CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL )
-#from homeassistant.components.sensor import ( PLATFORM_SCHEMA )
+import homeassistant.helpers.config_validation as cv
 
-_LOGGER = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 FLO_DOMAIN = 'flo'
 FLO_USER_AGENT = 'Home Assistant (Flo; https://github.com/rsnodgrass/hass-integrations/)'
+
+CONFIG_SCHEMA = vol.Schema({
+    FLO_DOMAIN: vol.Schema({
+        vol.Required(CONF_USERNAME): cv.string,
+        vol.Required(CONF_PASSWORD): cv.string
+    })
+}, extra=vol.ALLOW_EXTRA)
 
 # cache expiry in minutes; TODO: make this configurable (with a minimum to prevent DDoS)
 FLO_CACHE_EXPIRY=10
@@ -54,14 +62,6 @@ FLO_UNIT_SYSTEMS = {
 }
 
 mutex = Lock()
-
-#CONFIG_SCHEMA = vol.Schema({
-#    FLO_DOMAIN: vol.Schema({
-#        vol.Required(CONF_USERNAME): cv.string,
-#        vol.Required(CONF_PASSWORD): cv.string
-#        vol.Optional(CONF_SCAN_INTERVAL, default=600): cv.positive_int
-#    })
-#}, extra=vol.ALLOW_EXTRA)
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
@@ -124,7 +124,7 @@ class FloService:
                 'Content-Type': 'application/json;charset=UTF-8'
             }
 
-            _LOGGER.debug("Authenticating Flo account %s via %s", self._username, auth_url)
+            LOG.debug("Authenticating Flo account %s via %s", self._username, auth_url)
             response = requests.post(auth_url, data=payload, headers=headers)
             # Example response:
             # { "token": "caJhb.....",
@@ -135,7 +135,7 @@ class FloService:
 
             json_response = response.json()
 
-            _LOGGER.debug("Flo user %s authentication results %s : %s", self._username, auth_url, json_response)
+            LOG.debug("Flo user %s authentication results %s : %s", self._username, auth_url, json_response)
             self._auth_token_expiry = now + int( int(json_response['tokenExpiration']) / 2)
             self._auth_token = json_response['token']
 
@@ -148,7 +148,7 @@ class FloService:
             'User-Agent': FLO_USER_AGENT
         }
         response = requests.get(url, headers=headers)
-        _LOGGER.debug("Flo GET %s : %s", url, response.content)
+        LOG.debug("Flo GET %s : %s", url, response.content)
         return response
 
     def get_waterflow_measurement(self, flo_icd_id):
@@ -159,7 +159,7 @@ class FloService:
         mutex.acquire()
         try:
             if self._last_waterflow_update > (now - (FLO_CACHE_EXPIRY * 60)):
-                _LOGGER.debug("Using cached waterflow measurements (expiry %d min): %s",
+                LOG.debug("Using cached waterflow measurements (expiry %d min): %s",
                               FLO_CACHE_EXPIRY, self._last_waterflow_measurement)
                 return self._last_waterflow_measurement
         finally:
