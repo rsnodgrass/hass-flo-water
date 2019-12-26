@@ -43,10 +43,8 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     # iterate all devices and create a valve switch for each device
     sensors = []
-    device_num = 0
     for device in location['devices']:
         device_id = device['id']
-        device_num = device_num + 1
         
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
@@ -64,7 +62,7 @@ class FloRateSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._name = self._attrs['nickname'] + ' Flow Rate'
+        self._name = 'Flo Water Flow Rate'
         self._state = None
         self.update()
 
@@ -94,7 +92,7 @@ class FloTempSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._name = self._attrs['nickname'] + ' Temperature'
+        self._name = 'Flo Water Temperature'
         self._state = None
         self.update()
 
@@ -124,8 +122,9 @@ class FloPressureSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._name = self._attrs['nickname'] + ' Pressure'
-        self._state = 0.0
+        self._name = 'Flo Water Pressure'
+        self._state = None
+        self.update()
 
     @property
     def unit_of_measurement(self):
@@ -154,7 +153,7 @@ class FloMonitoringMode(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._name = self._attrs['nickname'] + ' Monitoring Mode'
+        self._name = 'Flo Monitoring Mode'
         self._mode = None
         self.update()
 

@@ -46,14 +46,12 @@ class FloWaterValve(FloEntity, ToggleEntity):
     def __init__(self, hass, flo, device_id):
         super().__init__(hass, device_id)
         self._flo = flo
+        self._name = 'Flo Water Valve'
+ 
         self.update()
-
         state = self.device_state
         if state:
             self._attrs['nickname'] = state['nickname']
-            self._name = 'Flo Water Valve (' + state['nickname'] + ')'
-        else:
-            self._name = 'Flo Water Valve'
 
     @property
     def is_on(self):
