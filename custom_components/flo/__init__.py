@@ -82,8 +82,9 @@ def discover_and_create_devices(hass, hass_config, flo_config):
         platform_config = {
             CONF_LOCATION_ID: location_config['id']
         }
+        LOG.info(f"Setting up Flo sensors with config {platform_config}")
+    
         for component in ['sensor', 'switch']:
-            LOG.info(f"Trying setup with config {platform_config}")
             discovery.load_platform(hass, component, FLO_DOMAIN, platform_config, hass_config)
 
 

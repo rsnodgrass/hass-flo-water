@@ -28,6 +28,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
         return False
 
     location_id = config[CONF_LOCATION_ID]
+    location_id = 'd6b2822a-f2ce-44b0-bbe2-3600a095d494'
     location = flo.location(location_id)
     if not location:
         LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo control valves")
