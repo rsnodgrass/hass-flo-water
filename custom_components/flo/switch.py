@@ -22,7 +22,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
 
-    flo = hass[FLO_SERVICE]
+    flo = hass.data[FLO_SERVICE]
     if not flo or not flo.is_connected():
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
@@ -74,5 +74,5 @@ class FloWaterValve(FloEntity, ToggleEntity):
         device_key = f"flo_device_{self._device_id}"
         data = self._flo.device(self._device_id)
         if data:
-            self._hass[device_key] = data
+            self._hass.data[device_key] = data
             LOG.info(f"Updated data for device {self._device_id}: {data}")

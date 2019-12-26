@@ -120,7 +120,7 @@ class FloEntity(Entity):
     @property
     def device_state(self):
         device_key = f"flo_device_{self._device_id}"
-        return self._hass[device_key]
+        return self._hass.data[device_key]
 
     def get_telemetry(self, field):
         if self.device_state:

@@ -182,7 +182,7 @@ class FloMonitoringMode(FloEntity):
             return self._mode
 
     def set_preset_mode(self, mode):
-        self._hass[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
+        self._hass.data[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
 
         # NOTE: there may be a delay between when the target mode is set on a Flo device and
         # the actual change in operation. We manually set this.
