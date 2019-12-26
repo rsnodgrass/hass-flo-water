@@ -27,7 +27,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 # pylint: disable=unused-argument
-# NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
 
@@ -178,6 +177,7 @@ class FloMonitoringMode(FloEntity):
         self._device_id = device_id
         self._name = 'Flo Monitoring Mode'
         self._mode = None
+        self._hass = hass
 
     @property
     def unit_of_measurement(self):
@@ -206,4 +206,7 @@ class FloMonitoringMode(FloEntity):
             return
 
         self._mode = mode
-        # FIXME: call service to update
+
+        flo = self._hass[FLO_SERVICE]
+        url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
+        flo.query(url, extra_params={ "systemMode": { "target": mode }})

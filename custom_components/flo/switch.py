@@ -61,11 +61,10 @@ class FloWaterValve(FloEntity, ToggleEntity):
         return True # FIXME
 
     def turn_on(self):
-        open_valve = '{"valve":{"target":"open"}}'
-
         url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
-        #https://api-gw.meetflo.com/api/v2/devices/<deviceId>
-        self._flo.query()
+        self._flo.query(url, extra_params={ "valve": { "target": "open" }})
 
     def turn_off(self):
-        close_valve = '{"valve":{"target":"closed"}}'
+        url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
+        self._flo.query(url, extra_params={ "valve": { "target": "closed" }})
+        
