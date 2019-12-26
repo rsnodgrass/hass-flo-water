@@ -33,7 +33,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
 
     if discovery_info:
         location_id = discovery_info[CONF_LOCATION_ID]
-    else:
+    else: # manual config
         location_id = config[CONF_LOCATION_ID]
 
     location = flo.location(location_id)
@@ -79,8 +79,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
         
     # NOTE: this updates the data periodically that is cached and shared by ALL sensors/switches
     def update(self):
-        device_key = f"flo_device_{self._device_id}"
         data = self._flo.device(self._device_id)
         if data:
-            self._hass.data[device_key] = data
+            self._hass.data[self.device_key] = data
             LOG.info(f"Updated data for device {self._device_id}: {data}")

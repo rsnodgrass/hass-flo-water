@@ -88,18 +88,9 @@ class FloEntity(Entity):
         self._hass = hass
         self._flo = hass.data[FLO_SERVICE]
         self._device_id = device_id
-
         self._attrs = {
             'device_id': device_id
         }
-
-        state = self.device_state
-        if state:
-            self._attrs['nickname'] = state['nickname']
-            self._name = 'Flo (' + self._attrs['nickname'] + ')'
-        else:
-            self._attrs['nickname'] = 'Flo Water'
-            self._name = self._attrs['nickname'] # default if unspecified
 
     @property
     def name(self):
@@ -112,9 +103,12 @@ class FloEntity(Entity):
         return self._attrs
 
     @property
+    def device_key(self):
+        return f"flo_device_{self._device_id}"
+
+    @property
     def device_state(self):
-        device_key = f"flo_device_{self._device_id}"
-        return self._hass.data[device_key]
+        return self._hass.data.get(self.device_key)
 
     def get_telemetry(self, field):
         if self.device_state:
