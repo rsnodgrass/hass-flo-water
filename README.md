@@ -6,19 +6,19 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
-NOTE: The 'master' branch of this custom component is considered unstable, alpha quality and not guaranteed to work.
-Please make sure to use one of the official release branches when installing using HACS.
+### Supported Features
 
-### Supported Sensors
-
-- water flow rate (gpm)
-- water pressure (psi)
-- water temperature (&deg;F)
-
-NOTE: Flo's webservice API only returns average sensor data for the previous 15 minute period.
-Real-time sensor state is not available from Flo at this time.
+- sensors: water flow rate (gpm), water pressure (psi), water temperature (&deg;F)
+- switching water supply on/off
+- multiple Flo devices and locations
+- changing the water leak monitoring mode (home, away, sleep)
 
 ## Installation
+
+### Versions
+
+The 'master' branch of this custom component is considered unstable, alpha quality and not guaranteed to work.
+Please make sure to use one of the official release branches when installing using HACS, see [CHANGELOG](CHANGELOG.md) for what has changed in each version.
 
 Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
 
@@ -97,12 +97,6 @@ More complex cards can be created, for example the following shows both the basi
 * BUG: does not yet support the Flo v2 API
 
 #### Feature Requests
-
-Supports:
-
-- water temperature (Fahrenheit), flow rate (gpm), and pressure (psi)
-- switching water supply on/off
-- changing the automatic water leak monitoring mode (home, away, sleep)
 
 Priority improvements:
 
