@@ -8,8 +8,13 @@ FUTURE:
 """
 import logging
 import json
+import voluptuous as vol
 
+from pyflowater.const import FLO_V2_API_PREFIX, FLO_MODES
 from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
+from homeassistant.components.sensor import PLATFORM_SCHEMA
+import homeassistant.helpers.config_validation as cv
+
 from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
@@ -18,12 +23,8 @@ ATTR_TIME       = 'time'
 ATTR_TOTAL_FLOW = 'total_flow'
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_LOCATION_ID): cv.string,
-    vol.Optional(CONF_ALLOW_UNREACHABLE,
-                default=DEFAULT_UNREACHABLE): cv.boolean,
-    vol.Optional(CONF_FILENAME): cv.string,
+    vol.Required(CONF_LOCATION_ID): cv.string
 })
-
 
 # pylint: disable=unused-argument
 # NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
@@ -181,7 +182,7 @@ class FloModeSensor(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
 
     def __init__(self, hass, flo_icd_id):
-         super().__init__(hass)
+        super().__init__(hass)
         self._flo_icd_id = flo_icd_id
         self._name = 'Flo Water Monitoring'
         self._state = 'Away'
@@ -206,3 +207,12 @@ class FloModeSensor(FloEntity):
         # FIXME: cache results so that for each sensor don't update multiple times
         json_response = self._flo_service.get_request('/icdalarmnotificationdeliveryrules/scan')
         LOG.info("Flo alarm notification: " + json_response)
+
+
+# FIXME: FloWaterMode  (home/away/sleep)
+# https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
+    def set_preset_mode(self, mode):
+        if not mode in FLO_MODES:
+            LOG.error("fInvalid preset mode {mode} (must be {FLO_MODES})")
+            return
+        # FIXME: this needs to move to a FloWaterMode sensor or something?
