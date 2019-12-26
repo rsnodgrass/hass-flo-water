@@ -33,8 +33,7 @@ CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_AUTO_DISCOVER, default=True): cv.boolean
-        #vol.Optional(CONF_LOCATIONS, default=True): cv.list  # locations [ <locationId1>, <locationId2>, ... ]
+        vol.Optional(CONF_LOCATION_ID, default=True): cv.list  # locations [ <locationId1>, <locationId2>, ... ]
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -64,29 +63,22 @@ def setup(hass, config):
         )
         return False
 
-    # auto discover and instantiate platforms for all devices and locations
-    auto_discover = conf.get(CONF_AUTO_DISCOVER)
-    if auto_discover:
-        discover_and_create_devices(hass, config, conf)
+    location_ids = conf.get(CONF_LOCATION_ID)
 
-    # FIXME: allow overriding discover to specify a specific location (or N locations) that are configured...
-    #    ... may want to remove discovery config, and always discover unless locations are specified
+    # if no location is specified, this will auto discover ALL Flo locations/devices and add them to Home Assistant
+    if location_ids == None:
+        location_ids = []
+        for location in flo.locations():
+            location_ids.append(location['id'])
+            LOG.info(f"Discovered Flo location {location['id']} ({location['nickname']})")
+
+    # create sensors/switches for all configured locations
+    for location_id in location_ids:
+        discovery_info = { CONF_LOCATION_ID: location_id }
+        for component in ['sensor', 'switch']:
+            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True
-
-def discover_and_create_devices(hass, hass_config, flo_config):
-    flo = hass.data[FLO_SERVICE]
-
-    # create sensors and switches for ALL devices at ALL discovered Flo locations
-    for location_config in flo.locations():
-        discovery_info = {
-            CONF_LOCATION_ID: location_config['id']
-        }
-        LOG.debug(f"Setting up Flo sensors with discovery info {discovery_info}")
-
-        for component in ['sensor', 'switch']:
-            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, hass_config)
-
 
 class FloEntity(Entity):
     """Base Entity class for Flo water inflow control device"""
