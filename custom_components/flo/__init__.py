@@ -79,13 +79,13 @@ def discover_and_create_devices(hass, hass_config, flo_config):
 
     # create sensors and switches for ALL devices at ALL discovered Flo locations
     for location_config in flo.locations():
-        platform_config = {
+        discovery_info = {
             CONF_LOCATION_ID: location_config['id']
         }
-        LOG.info(f"Setting up Flo sensors with config {platform_config}")
-    
+        LOG.debug(f"Setting up Flo sensors with discovery info {discovery_info}")
+
         for component in ['sensor', 'switch']:
-            discovery.load_platform(hass, component, FLO_DOMAIN, platform_config, hass_config)
+            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, hass_config)
 
 
 class FloEntity(Entity):
