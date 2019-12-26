@@ -31,7 +31,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
 
     flo = hass[FLO_SERVICE]
-    if not flo or not flo.service.is_connected():
+    if not flo or not flo.is_connected():
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
@@ -63,10 +63,11 @@ class FloRateSensor(FloEntity):
     """Water flow rate sensor for a Flo device"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass)
+        super().__init__(hass, device_id)
         self._device_id = device_id
         self._name = 'Flo Water Flow Rate'
-        self._state = 0.0
+        self._state = None
+        self.update()
 
     @property
     def unit_of_measurement(self):
@@ -84,25 +85,20 @@ class FloRateSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
-
-        # FIXME: add sanity checks on response
-
-        self._state = float(json_response['average_flowrate'])
-        self._attrs.update({
-            ATTR_TOTAL_FLOW  : round(float(json_response['total_flow']),1),
-            ATTR_TIME        : json_response['time']
-        })
-        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        state = float(self.get_telemetry('gpm'))
+        if self._state != state:
+            self._state = state
+            LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
 class FloTempSensor(FloEntity):
     """Water temp sensor for a Flo device"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass)
+        super().__init__(hass, device_id)
         self._device_id = device_id
         self._name = 'Flo Water Temperature'
-        self._state = 0.0
+        self._state = None
+        self.update()
 
     @property
     def unit_of_measurement(self):
@@ -119,24 +115,17 @@ class FloTempSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        # FIXME: cache results so that for each sensor don't update multiple times
-        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
-
-        # FIXME: add sanity checks on response
-
-        # FUTURE: round just to nearest degree?
-        self._state = round(float(json_response['average_temperature']), 1)
-        self._attrs.update({
-            ATTR_TIME        : json_response['time']
-        })
-        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        state = float(self.get_telemetry('tempF'))
+        if self._state != state:
+            self._state = state
+            LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
 
 class FloPressureSensor(FloEntity):
     """Water pressure sensor for a Flo device"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass)
+        super().__init__(hass, device_id)
         self._device_id = device_id
         self._name = 'Flo Water Pressure'
         self._state = 0.0
@@ -157,23 +146,17 @@ class FloPressureSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        # FIXME: cache results so that for each sensor don't update multiple times
-        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
-
-        # FIXME: add sanity checks on response
-
-        self._state = round(float(json_response['average_pressure']), 1)
-        self._attrs.update({
-            ATTR_TIME        : json_response['time']
-        })
-        LOG.info(f"Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        state = float(self.get_telemetry('psi'))
+        if self._state != state:
+            self._state = state
+            LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
 # https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
 class FloMonitoringMode(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass)
+        super().__init__(hass, device_id)
         self._device_id = device_id
         self._name = 'Flo Monitoring Mode'
         self._mode = None
@@ -195,18 +178,14 @@ class FloMonitoringMode(FloEntity):
 
     def update(self):
         """Update sensor state"""
-    
-        # FIXME: cache results so that for each sensor don't update multiple times
-        json_response = self._flo_service.get_request('/icdalarmnotificationdeliveryrules/scan')
-        LOG.info("Flo alarm notification: " + json_response)
+        if self.device_state:
+            systemMode = self.device_state['systemMode']
+            self._mode = systemMode['lastKnown']
+            return self._mode
+        else:
+            return None
 
     def set_preset_mode(self, mode):
-        if not mode in FLO_MODES:
-            LOG.error("fInvalid preset mode {mode} (must be {FLO_MODES})")
-            return
-
+        self._hass[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
+        # update() or set directly?
         self._mode = mode
-
-        flo = self._hass[FLO_SERVICE]
-        url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
-        flo.query(url, extra_params={ "systemMode": { "target": mode }})

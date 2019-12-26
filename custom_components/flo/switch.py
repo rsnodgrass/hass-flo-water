@@ -23,7 +23,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
 
     flo = hass[FLO_SERVICE]
-    if not flo or not flo.service.is_connected():
+    if not flo or not flo.is_connected():
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
@@ -45,7 +45,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
     """Flo switch to turn on/off water flow."""
 
     def __init__(self, hass, flo, name, device_id):
-        super().__init__(hass)
+        super().__init__(hass, device_id)
         self._name = name
         self._flo = flo
         self._device_id = device_id
@@ -58,7 +58,12 @@ class FloWaterValve(FloEntity, ToggleEntity):
     @property
     def is_on(self):
         """Return true if Flo control valve is on."""
-        return True # FIXME
+        if self.device_state:
+            valve = self.device_state['valve']
+            return valve['lastKnown'] == 'open'
+        else:
+            # FIXME: we assume the valve is on IF we cannot connect to the Flo service
+            return True
 
     def turn_on(self):
         url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
