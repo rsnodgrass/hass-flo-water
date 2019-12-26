@@ -33,9 +33,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
-    pp = pprint.PrettyPrinter(indent=4)
-    LOG.info(f"Discovery {pp.pprint(discovery_info)}")
-
     if discovery_info:
         location_id = discovery_info[CONF_LOCATION_ID]
     else: # manual config

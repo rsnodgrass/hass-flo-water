@@ -3,7 +3,6 @@ Support for Flo Water Control System inflow control device valve on/off
 """
 import logging
 import voluptuous as vol
-import pprint
 
 from homeassistant.helpers.entity import ToggleEntity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -27,9 +26,6 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     if flo == None or not flo.is_connected:
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
-
-    pp = pprint.PrettyPrinter(indent=4)
-    LOG.info(f"Discovery {pp.pprint(discovery_info)}")
 
     if discovery_info:
         location_id = discovery_info[CONF_LOCATION_ID]
@@ -86,6 +82,6 @@ class FloWaterValve(FloEntity, ToggleEntity):
         if data:
             self._hass.data[self.device_key] = data
             self._is_open = ( data['systemMode'].get('target') != 'closed' )
-            LOG.info(f"Updated data for device {self._device_id}: {data}")
+            #LOG.info(f"Updated data for device {self._device_id}: {data}")
         else:
             LOG.error(f"Could not get state for device {self._device_id}")
