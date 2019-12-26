@@ -180,8 +180,12 @@ class FloMonitoringMode(FloEntity):
         return self._mode
 
     def set_preset_mode(self, mode):
+        if not mode in FLO_MODES:
+            LOG.info(f"Invalid mode '{mode}' for FloSense monitoring, ignoring!")
+            return
+
         self._hass.data[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
 
-        # NOTE: there may be a delay between when the target mode is set on a Flo device and
+        # there may be a delay between when the target mode is set on a Flo device and
         # the actual change in operation. We manually set this.
         self._mode = mode
