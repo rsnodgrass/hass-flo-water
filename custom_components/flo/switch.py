@@ -36,25 +36,24 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     # iterate all devices and create a valve switch for each device
     switches = []
     for device in location['devices']:
-        name = f"Flo Water Valve ({location['nickname']})"
-        switches.append( FloWaterValve(hass, flo, name, device['id']) )
+        switches.append( FloWaterValve(hass, flo, device['id']) )
 
     add_switches_callback(switches)
 
 class FloWaterValve(FloEntity, ToggleEntity):
     """Flo switch to turn on/off water flow."""
 
-    def __init__(self, hass, flo, name, device_id):
+    def __init__(self, hass, flo, device_id):
         super().__init__(hass, device_id)
-        self._name = name
         self._flo = flo
-        self._device_id = device_id
         self.update()
 
-    @property
-    def name(self):
-        """Inflow control valve switch name"""
-        return "{} {}".format("Flo", "Water Control Valve") # FIXME
+        state = self.device_state
+        if state:
+            self._attrs['nickname'] = state['nickname']
+            self._name = 'Flo Water Valve (' + state['nickname'] + ')'
+        else:
+            self._name = 'Flo Water Valve'
 
     @property
     def is_on(self):
@@ -67,12 +66,10 @@ class FloWaterValve(FloEntity, ToggleEntity):
             return True
 
     def turn_on(self):
-        url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
-        self._flo.query(url, extra_params={ "valve": { "target": "open" }})
+        self._flo.turn_valve_on(self._device_id)
 
     def turn_off(self):
-        url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
-        self._flo.query(url, extra_params={ "valve": { "target": "closed" }})
+        self._flo.turn_valve_off(self._device_id)
         
     # NOTE: this updates the data periodically that is cached and shared by ALL sensors/switches
     def update(self):

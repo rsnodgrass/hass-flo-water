@@ -3,8 +3,8 @@ Support for Flo water inflow monitoring and control devices
 
 FUTURE:
 - convert to async
-- use track_point_in_utc_time() to trigger and update every 16 minutes
-     (one minute after Flo's every 15 minute average rollup)
+- should this use Flo's every 15-minutes average rollup instead of current telemetry?
+- could change to non-polling mode (since the "switch" does the actual polling, these would just update whenever the switch detects a state change)
 """
 import logging
 import json
@@ -64,8 +64,7 @@ class FloRateSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._device_id = device_id
-        self._name = 'Flo Water Flow Rate'
+        self._name = self._attrs['nickname'] + ' Flow Rate'
         self._state = None
         self.update()
 
@@ -95,8 +94,7 @@ class FloTempSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._device_id = device_id
-        self._name = 'Flo Water Temperature'
+        self._name = self._attrs['nickname'] + ' Temperature'
         self._state = None
         self.update()
 
@@ -126,8 +124,7 @@ class FloPressureSensor(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._device_id = device_id
-        self._name = 'Flo Water Pressure'
+        self._name = self._attrs['nickname'] + ' Pressure'
         self._state = 0.0
 
     @property
@@ -157,9 +154,7 @@ class FloMonitoringMode(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._hass = hass
-        self._device_id = device_id
-        self._name = 'Flo Monitoring Mode'
+        self._name = self._attrs['nickname'] + ' Monitoring Mode'
         self._mode = None
         self.update()
 

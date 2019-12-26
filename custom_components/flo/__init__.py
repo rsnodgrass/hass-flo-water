@@ -93,12 +93,19 @@ class FloEntity(Entity):
         """Store service upon init."""
         self._hass = hass
         self._flo = hass.data[FLO_SERVICE]
+        self._device_id = device_id
+
         self._attrs = {
             'device_id': device_id
         }
 
-        if self._name is None:
-            self._name = 'Flo Water' # default if unspecified
+        state = self.device_state
+        if state:
+            self._attrs['nickname'] = state['nickname']
+            self._name = 'Flo (' + self._attrs['nickname'] + ')'
+        else:
+            self._attrs['nickname'] = 'Flo Water'
+            self._name = self._attrs['nickname'] # default if unspecified
 
     @property
     def name(self):
