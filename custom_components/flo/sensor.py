@@ -10,6 +10,7 @@ FUTURE:
 import logging
 import json
 import voluptuous as vol
+import pprint
 
 from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -35,6 +36,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     if flo == None or not flo.is_connected:
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
+
+    pp = pprint.PrettyPrinter(indent=4)
+    LOG.info(f"Config {pp.pprint(config)}")
 
     location_id = config[CONF_LOCATION_ID]
     location = flo.location(location_id)
