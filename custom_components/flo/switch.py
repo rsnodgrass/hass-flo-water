@@ -30,7 +30,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     location_id = config[CONF_LOCATION_ID]
     location = flo.location(location_id)
     if not location:
-        LOG.warning(f"Could not load Flo location {location_id}, ignoring creation of control valves")
+        LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo control valves")
         return False
 
     # iterate all devices and create a valve switch for each device

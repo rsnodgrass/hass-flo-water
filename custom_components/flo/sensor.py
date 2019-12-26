@@ -10,11 +10,11 @@ import logging
 import json
 import voluptuous as vol
 
-from pyflowater.const import FLO_V2_API_PREFIX, FLO_MODES
 from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
 
+from pyflowater.const import FLO_V2_API_PREFIX, FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
 from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
@@ -36,45 +36,36 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
-        devices = location_config['devices']
-        for device in devices:
-            id = device['id']
+    location_id = config[CONF_LOCATION_ID]
+    location = flo.location(location_id)
+    if not location:
+        LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo sensors")
+        return False
 
-
-
-    # get a list of all Flo inflow control devices
-    response = flo_service.get_request('/icds/me')
-    # Example response:
-    #   { "is_paired": true,
-    #     "device_id": "a0b405bfe487",
-    #     "id": "2faf8cd6-a8eb-4b63-bd1a-33298a26eca8",
-    #     "location_id": "e7b2833a-f2cb-a4b1-ace2-36c21075d493" }
-    LOG.info(f"Received content {response.content}")
-    LOG.info(f"UTF8 content {response.content.decode('utf8')}")
-    LOG.info(f"JSON content {response.json()}")
-    json_response = response.json()
-    flo_icd_id = json_response['id']
-
-    # FUTURE: support multiple devices (and locations)
+    # iterate all devices and create a valve switch for each device
     sensors = []
-    sensors.append(FloRateSensor(flo_service, flo_icd_id))
-    sensors.append(FloTempSensor(flo_service, flo_icd_id))
-    sensors.append(FloPressureSensor(flo_service, flo_icd_id))
-#    sensors.append(FloModeSensor(flo_service, flo_icd_id))
+    device_num = 0
+    for device in location['devices']:
+        device_id = device['id']
+        device_num = device_num + 1
+        
+        sensors.append( FloRateSensor(hass, device_id) )
+        sensors.append( FloTempSensor(hass, device_id) )
+        sensors.append( FloPressureSensor(hass, device_id) )
+        sensors.append( FloMonitoringMode(hass, device_id) )
 
     for sensor in sensors:
         sensor.update()
 
-    # execute callback to add new entities
     add_sensors_callback(sensors)
 
 # pylint: disable=too-many-instance-attributes
 class FloRateSensor(FloEntity):
     """Water flow rate sensor for a Flo device"""
 
-    def __init__(self, hass, flo_icd_id):
+    def __init__(self, hass, device_id):
         super().__init__(hass)
-        self._flo_icd_id = flo_icd_id
+        self._device_id = device_id
         self._name = 'Flo Water Flow Rate'
         self._state = 0.0
 
@@ -94,7 +85,7 @@ class FloRateSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        json_response = self._flo_service.get_waterflow_measurement(self._flo_icd_id)
+        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
 
         # FIXME: add sanity checks on response
 
@@ -108,9 +99,9 @@ class FloRateSensor(FloEntity):
 class FloTempSensor(FloEntity):
     """Water temp sensor for a Flo device"""
 
-    def __init__(self, hass, flo_icd_id):
+    def __init__(self, hass, device_id):
         super().__init__(hass)
-        self._flo_icd_id = flo_icd_id
+        self._device_id = device_id
         self._name = 'Flo Water Temperature'
         self._state = 0.0
 
@@ -130,7 +121,7 @@ class FloTempSensor(FloEntity):
     def update(self):
         """Update sensor state"""
         # FIXME: cache results so that for each sensor don't update multiple times
-        json_response = self._flo_service.get_waterflow_measurement(self._flo_icd_id)
+        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
 
         # FIXME: add sanity checks on response
 
@@ -145,9 +136,9 @@ class FloTempSensor(FloEntity):
 class FloPressureSensor(FloEntity):
     """Water pressure sensor for a Flo device"""
 
-    def __init__(self, hass, flo_icd_id):
+    def __init__(self, hass, device_id):
         super().__init__(hass)
-        self._flo_icd_id = flo_icd_id
+        self._device_id = device_id
         self._name = 'Flo Water Pressure'
         self._state = 0.0
 
@@ -168,7 +159,7 @@ class FloPressureSensor(FloEntity):
     def update(self):
         """Update sensor state"""
         # FIXME: cache results so that for each sensor don't update multiple times
-        json_response = self._flo_service.get_waterflow_measurement(self._flo_icd_id)
+        json_response = self._flo_service.get_waterflow_measurement(self._device_id)
 
         # FIXME: add sanity checks on response
 
@@ -176,26 +167,27 @@ class FloPressureSensor(FloEntity):
         self._attrs.update({
             ATTR_TIME        : json_response['time']
         })
-        LOG.info("Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
+        LOG.info(f"Updated %s to %f %s : %s", self._name, self._state, self.unit_of_measurement, json_response)
 
-class FloModeSensor(FloEntity):
+# https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
+class FloMonitoringMode(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
 
-    def __init__(self, hass, flo_icd_id):
+    def __init__(self, hass, device_id):
         super().__init__(hass)
-        self._flo_icd_id = flo_icd_id
-        self._name = 'Flo Water Monitoring'
-        self._state = 'Away'
+        self._device_id = device_id
+        self._name = 'Flo Monitoring Mode'
+        self._mode = None
 
     @property
     def unit_of_measurement(self):
-        """Mode: Home, Away, Sleep"""
+        """Monitoring mode"""
         return 'mode'
 
     @property
     def state(self):
-        """Flo water monitoring mode"""
-        return self._state
+        """Flo monitoring mode: home, away, sleep"""
+        return self._mode
 
     @property
     def icon(self):
@@ -208,11 +200,10 @@ class FloModeSensor(FloEntity):
         json_response = self._flo_service.get_request('/icdalarmnotificationdeliveryrules/scan')
         LOG.info("Flo alarm notification: " + json_response)
 
-
-# FIXME: FloWaterMode  (home/away/sleep)
-# https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
     def set_preset_mode(self, mode):
         if not mode in FLO_MODES:
             LOG.error("fInvalid preset mode {mode} (must be {FLO_MODES})")
             return
-        # FIXME: this needs to move to a FloWaterMode sensor or something?
+
+        self._mode = mode
+        # FIXME: call service to update
