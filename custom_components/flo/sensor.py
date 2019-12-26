@@ -20,9 +20,6 @@ from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
-ATTR_TIME       = 'time'
-ATTR_TOTAL_FLOW = 'total_flow'
-
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
 })
@@ -87,7 +84,7 @@ class FloRateSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        state = float(self.get_telemetry('gpm'))
+        state = self.get_telemetry('gpm')
         if self._state != state:
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
@@ -116,7 +113,7 @@ class FloTempSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        state = float(self.get_telemetry('tempF'))
+        state = self.get_telemetry('tempF')
         if self._state != state:
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
@@ -147,7 +144,7 @@ class FloPressureSensor(FloEntity):
 
     def update(self):
         """Update sensor state"""
-        state = float(self.get_telemetry('psi'))
+        state = self.get_telemetry('psi')
         if self._state != state:
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
@@ -179,11 +176,8 @@ class FloMonitoringMode(FloEntity):
     def update(self):
         """Update sensor state"""
         if self.device_state:
-            systemMode = self.device_state['systemMode']
-            self._mode = systemMode['lastKnown']
-            return self._mode
-        else:
-            return self._mode
+            self._mode = self.device_state['systemMode'].get('target')
+        return self._mode
 
     def set_preset_mode(self, mode):
         self._hass.data[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
