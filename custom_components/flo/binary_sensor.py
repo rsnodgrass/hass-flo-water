@@ -60,4 +60,5 @@ class FloPhysicalValveSensor(FloEntity, BinarySensorDevice):
     def update(self):
         """Update sensor state"""
         if self.device_state:
-            self._is_open = ( self.device_state['systemMode'].get('lastKnown') != 'closed' )
+            system_mode = data['systemMode']
+            self._is_open = system_mode['lastKnown'] == 'open'

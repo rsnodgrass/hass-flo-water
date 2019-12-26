@@ -83,7 +83,8 @@ class FloWaterValve(FloEntity, ToggleEntity):
         data = self._flo.device(self._device_id)
         if data:
             self._hass.data[self.device_key] = data
-            self._is_open = ( data['systemMode'].get('target') == 'open' )
+            system_mode =  data['systemMode']
+            self._is_open = system_mode['target'] == 'open'
             LOG.info(f"Updated latest Flo system mode info {data['systemInfo']} for {self._device_id}" )
             #LOG.info(f"Updated data for device {self._device_id}: {data}")
         else:
