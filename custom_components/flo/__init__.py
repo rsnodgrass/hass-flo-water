@@ -102,7 +102,7 @@ class FloEntity(Entity):
         state = self.device_state
         if state:
             self._attrs['nickname'] = state['nickname']
-        self._name = 'Flo (' + self._attrs['nickname'] + ')'
+            self._name = 'Flo (' + self._attrs['nickname'] + ')'
         else:
             self._attrs['nickname'] = 'Flo Water'
             self._name = self._attrs['nickname'] # default if unspecified
