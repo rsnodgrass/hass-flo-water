@@ -83,3 +83,5 @@ class FloWaterValve(FloEntity, ToggleEntity):
         if data:
             self._hass.data[self.device_key] = data
             LOG.info(f"Updated data for device {self._device_id}: {data}")
+        else:
+            LOG.error(f"Could not get state for device {self._device_id}")
