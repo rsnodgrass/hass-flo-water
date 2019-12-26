@@ -2,89 +2,96 @@
 Flo Smart Home Water Control System for Home Assistant
 See https://github.com/rsnodgrass/hass-flo-water
 
-NOTE: Split out all Flo service calls to a pyflo Python library.
-
 For good example of update, see Leaf sensor/switch:
 https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/components/nissan_leaf/__init__.py
-
-FUTURE APIS:
-- https://api.meetflo.com/api/v1/icds/me
-- https://api.meetflo.com/api/v1/alerts/icd/{flo_icd_id}?size=1
-- https://api.meetflo.com/api/v1/alerts/icd/{flo_icd_id}?page=1&size=10
-- https://api.meetflo.com/api/v1/locations/me
-- https://api.meetflo.com/api/v1/users/me
-- https://api.meetflo.com/api/v1/userdetails/me
-
-FIXME:
-- https://api-gw.meetflo.com/api/v2/users/9ddb2ced-c495-3874-ac52-b63g3008b6c7?expand=locations,alarmSettings
-- need to get the list of locations from above (to support multiple houses with Flo devices on one account)
 """
 import logging
 import json
 import requests
 import time
-from threading import Thread, Lock
 import voluptuous as vol
+from requests.exceptions import HTTPError, ConnectTimeout
 
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import ( CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL )
 import homeassistant.helpers.config_validation as cv
 
+from pyflowater import PyFlo
+
 LOG = logging.getLogger(__name__)
 
 FLO_DOMAIN = 'flo'
-FLO_USER_AGENT = 'Home Assistant (Flo; https://github.com/rsnodgrass/hass-integrations/)'
+FLO_SERVICE = 'flo_service'
+
+NOTIFICATION_ID = 'flo_notification'
+
+CONF_AUTO_DISCOVER = 'discovery'
+CONF_LOCATION_ID = 'location_id'
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string
+        vol.Required(CONF_PASSWORD): cv.string,
+        vol.Optional(CONF_AUTO_DISCOVER, default=True): cv.boolean
+        #vol.Optional(CONF_LOCATIONS, default=True): cv.list  # locations [ <locationId1>, <locationId2>, ... ]
     })
 }, extra=vol.ALLOW_EXTRA)
 
 # cache expiry in minutes; TODO: make this configurable (with a minimum to prevent DDoS)
 FLO_CACHE_EXPIRY=10
-FLO_HOSTNAME="api.meetflo.com"       # v1 API
-FLO_HOSTNAME_V2="api-gw.meetflo.com" # v2 API
-
-FLO_UNIT_SYSTEMS = {
-    'imperial_us': { 
-        'system':   'imperial_us',
-        'temp':     '°F',
-        'flow':     'gpm',
-        'pressure': 'psi',
-    },
-    'imperial_uk': { 
-        'system':   'imperial_uk',
-        'temp':     '°F',
-        'flow':     'gpm',
-        'pressure': 'psi',
-    },
-    'metric': { 
-        'system':   'metric',
-        'temp':     '°C',
-        'flow':     'lpm',
-        'pressure': 'kPa'
-    }
-}
-
-mutex = Lock()
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
-#    conf = config[FLO_DOMAIN]
-#    conf = {}
-#    for component in ['sensor', 'switch']:
-#        discovery.load_platform(hass, component, FLO_DOMAIN, conf, config)
+
+    conf = config[FLO_DOMAIN]
+    username = conf.get(CONF_USERNAME)
+    password = conf.get(CONF_PASSWORD)
+
+    try:
+        pyflo_api = PyFlo(username, password)
+        if not pyflo_api.is_connected():
+            LOG.error(f"Could not connect to Flo service with user {username}")
+            return False
+
+        hass.data[FLO_SERVICE] = FloService(pyflo_api)
+
+    except (ConnectTimeout, HTTPError) as ex:
+        LOG.error(f"Unable to connect to Flo service: {str(ex)}")
+        hass.components.persistent_notification.create(
+            f"Error: {ex}<br />You will need to restart Home Assistant after fixing.",
+            title='Flo', notification_id=NOTIFICATION_ID
+        )
+        return False
+
+    # auto discover and instantiate platforms for all devices and locations
+    auto_discover = conf.get(CONF_AUTO_DISCOVER)
+    if auto_discover:
+        discover_and_create_devices(hass, config, conf)
+
+    # FIXME: allow overriding discover to specify a specific location (or N locations) that are configured...
+    #    ... may want to remove discovery config, and always discover unless locations are specified
+
     return True
+
+def discover_and_create_devices(hass, hass_config, conf):
+    flo = hass.data[FLO_SERVICE]
+
+    # create sensors and switches for ALL devices at ALL discovered Flo locations
+    for location_config in flo.service.locations():
+        platform_config = {
+            CONF_LOCATION_ID: location_config['id']
+        }
+        for component in ['sensor', 'switch']:
+            discovery.load_platform(hass, component, FLO_DOMAIN, platform_config, hass_config)
+
 
 class FloEntity(Entity):
     """Base Entity class for Flo water inflow control device"""
 
-    def __init__(self, flo_service):
+    def __init__(self, hass):
         """Store service upon init."""
-        self._flo_service = flo_service
+        self._flo_service = hass.data[FLO_SERVICE]
         self._attrs = {}
 
         if self._name is None:
@@ -101,83 +108,34 @@ class FloEntity(Entity):
         return self._attrs
 
 class FloService:
-    """Client interface to the Flo service API"""
+    """Client interface to the Flo service API (adds caching over raw PyFlo service API)"""
 
-    def __init__(self, config):
-        self._auth_token = None
-        self._auth_token_expiry = 0
-        
-        self._username = config[CONF_USERNAME]
-        self._password = config[CONF_PASSWORD]
-
+    def __init__(self, pyflo_api):
+        self._pyflo_api = pyflo_api
         self._last_waterflow_measurement = None
         self._last_waterflow_update = 0
 
-#        self._units = FLO_UNIT_SYSTEMS[self._get_unit_system]
+    @property
+    def service(self):
+        return self._pyflo_api
 
-    def _flo_authentication_token(self):
-        now = int(time.time())
-        if not self._auth_token or now > self._auth_token_expiry:
-            # authenticate to the Flo API
-            #   POST https://api.meetflo.com/api/v1/users/auth
-            #   Payload: {username: "your@email.com", password: "1234"}
-
-            auth_url = f"https://{FLO_HOSTNAME}/api/v1/users/auth"
-            payload = json.dumps({
-                'username': self._username,
-                'password': self._password
-            })
-            headers = { 
-                'User-Agent': FLO_USER_AGENT,
-                'Content-Type': 'application/json;charset=UTF-8'
-            }
-
-            LOG.debug("Authenticating Flo account %s via %s", self._username, auth_url)
-            response = requests.post(auth_url, data=payload, headers=headers)
-            # Example response:
-            # { "token": "caJhb.....",
-            #   "tokenPayload": { "user": { "user_id": "9aab2ced-c495-4884-ac52-b63f3008b6c7", "email": "your@email.com"},
-            #                     "timestamp": 1559246133 },
-            #   "tokenExpiration": 86400,
-            #   "timeNow": 1559226161 }
-
-            json_response = response.json()
-
-            LOG.debug("Flo user %s authentication results %s : %s", self._username, auth_url, json_response)
-            self._auth_token_expiry = now + int( int(json_response['tokenExpiration']) / 2)
-            self._auth_token = json_response['token']
-
-        return self._auth_token
-
-    def get_request(self, url_path):
-        url = f"https://{FLO_HOSTNAME}/api/v1{url_path}"
-        headers = { 
-            'authorization': self._flo_authentication_token(), 
-            'User-Agent': FLO_USER_AGENT
-        }
-        response = requests.get(url, headers=headers)
-        LOG.debug("Flo GET %s : %s", url, response.content)
-        return response
+    # FIXME: cache the initial configuration...for now, the only refresh of Flo devices is to restart HA
 
     def get_waterflow_measurement(self, flo_icd_id):
         """Fetch latest state for a Flo inflow control device"""
 
         # to avoid DDoS Flo's servers, cache any results loaded in last 10 minutes
         now = int(time.time())
-        mutex.acquire()
-        try:
-            if self._last_waterflow_update > (now - (FLO_CACHE_EXPIRY * 60)):
-                LOG.debug("Using cached waterflow measurements (expiry %d min): %s",
-                              FLO_CACHE_EXPIRY, self._last_waterflow_measurement)
-                return self._last_waterflow_measurement
-        finally:
-            mutex.release()
+        if self._last_waterflow_update > (now - (FLO_CACHE_EXPIRY * 60)):
+            LOG.debug("Using cached waterflow measurements (expiry %d min): %s",
+                      FLO_CACHE_EXPIRY, self._last_waterflow_measurement)
+            return self._last_waterflow_measurement
 
         # request data for the last 30 minutes, plus Flo API takes ms since epoch
         timestamp = (now - ( 60 * 30 )) * 1000
 
         waterflow_url = '/waterflow/measurement/icd/' + flo_icd_id + '/last_day?from=' + str(timestamp)
-        response = self.get_request(waterflow_url)
+        response = self.service.query(waterflow_url, method='GET')
         # Example response: [ {
         #    "average_flowrate": 0,
         #    "average_pressure": 86.0041294012751,
@@ -208,10 +166,13 @@ class FloService:
     
         return latest_measurement
 
-    def _get_unit_system(self):
+    @property
+    def unit_system(self):
         """Return user configuration, such as units"""
 
-        response = self.get_request('/userdetails/me')
+        # FIXME: cache!
+        response = self.service.query('/userdetails/me', method='GET')
+ 
         # Example response: {
         #    "firstname": "Jenny",
         #    "lastname": "Tutone",

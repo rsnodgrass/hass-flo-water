@@ -9,18 +9,37 @@ FUTURE:
 import logging
 import json
 
-from homeassistant.const import ( TEMP_FAHRENHEIT, ATTR_TEMPERATURE )
-from . import FloService, FloEntity
+from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
+from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
 ATTR_TIME       = 'time'
 ATTR_TOTAL_FLOW = 'total_flow'
 
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+    vol.Required(CONF_LOCATION_ID): cv.string,
+    vol.Optional(CONF_ALLOW_UNREACHABLE,
+                default=DEFAULT_UNREACHABLE): cv.boolean,
+    vol.Optional(CONF_FILENAME): cv.string,
+})
+
+
 # pylint: disable=unused-argument
+# NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
-    flo_service = FloService(config)
+
+    flo = hass[FLO_SERVICE]
+    if not flo or not flo.service.is_connected():
+        LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
+        return False
+
+        devices = location_config['devices']
+        for device in devices:
+            id = device['id']
+
+
 
     # get a list of all Flo inflow control devices
     response = flo_service.get_request('/icds/me')
@@ -52,11 +71,11 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 class FloRateSensor(FloEntity):
     """Water flow rate sensor for a Flo device"""
 
-    def __init__(self, flo_service, flo_icd_id):
+    def __init__(self, hass, flo_icd_id):
+        super().__init__(hass)
         self._flo_icd_id = flo_icd_id
         self._name = 'Flo Water Flow Rate'
         self._state = 0.0
-        super().__init__(flo_service)
 
     @property
     def unit_of_measurement(self):
@@ -88,11 +107,11 @@ class FloRateSensor(FloEntity):
 class FloTempSensor(FloEntity):
     """Water temp sensor for a Flo device"""
 
-    def __init__(self, flo_service, flo_icd_id):
+    def __init__(self, hass, flo_icd_id):
+        super().__init__(hass)
         self._flo_icd_id = flo_icd_id
         self._name = 'Flo Water Temperature'
         self._state = 0.0
-        super().__init__(flo_service)
 
     @property
     def unit_of_measurement(self):
@@ -125,11 +144,11 @@ class FloTempSensor(FloEntity):
 class FloPressureSensor(FloEntity):
     """Water pressure sensor for a Flo device"""
 
-    def __init__(self, flo_service, flo_icd_id):
+    def __init__(self, hass, flo_icd_id):
+        super().__init__(hass)
         self._flo_icd_id = flo_icd_id
         self._name = 'Flo Water Pressure'
         self._state = 0.0
-        super().__init__(flo_service)
 
     @property
     def unit_of_measurement(self):
@@ -161,11 +180,11 @@ class FloPressureSensor(FloEntity):
 class FloModeSensor(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
 
-    def __init__(self, flo_service, flo_icd_id):
+    def __init__(self, hass, flo_icd_id):
+         super().__init__(hass)
         self._flo_icd_id = flo_icd_id
         self._name = 'Flo Water Monitoring'
         self._state = 'Away'
-        super().__init__(flo_service)
 
     @property
     def unit_of_measurement(self):

@@ -6,6 +6,9 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
+NOTE: The 'master' branch of this custom component is considered unstable, alpha quality and not guaranteed to work.
+Please make sure to use one of the official release branches when installing using HACS.
+
 ### Supported Sensors
 
 - water flow rate (gpm)
@@ -114,9 +117,12 @@ Other ideas (no plans to add currently):
 - support leak detection sensitivity settings (all, small, bigger, biggest)
 - create water sensor base class in Home Assistant (applies to other water sensing/shutoff valves)
 
+## Unsupported 'master' branch status
+
+* Currently converting over to pyflowater and the Flo V2 cloud APIs
+
 ## Automation Ideas
 
 - automatically turn on Away mode for water control system when house goes into Away mode (and vice-a-versa)
 - pre-warm heated towel rack when shower flow rate is detected
 - toilet flush detection as an occupancy sensor (e.g. disable Away modes)
-
