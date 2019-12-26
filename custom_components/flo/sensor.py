@@ -9,7 +9,6 @@ FUTURE:
 """
 import logging
 import voluptuous as vol
-import pprint
 
 from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -143,7 +142,7 @@ class FloPressureSensor(FloEntity):
         """Update sensor state"""
         state = self.get_telemetry('psi')
         if self._state != state:
-            self._state = state
+            self._state = round(state, 2)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
 # https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
