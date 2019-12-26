@@ -55,26 +55,24 @@ class FloWaterValve(FloEntity, ToggleEntity):
         super().__init__(hass, device_id)
         self._flo = flo
         self._name = 'Flo Water Valve'
- 
+        self._is_open = True # default to being open
         self.update()
+
         state = self.device_state
         if state:
             self._attrs['nickname'] = state['nickname']
 
     @property
     def icon(self):
-        return 'mdi:valve'
-#        return 'mdi:water-pump'
+        if self.is_on:
+            return 'mdi:valve-open'
+        else:
+            return 'mdi:valve-closed'
 
     @property
     def is_on(self):
         """Return true if Flo control valve is on."""
-        if self.device_state:
-            valve = self.device_state['valve']
-            return valve['lastKnown'] == 'open'
-        else:
-            # FIXME: we assume the valve is on IF we cannot connect to the Flo service
-            return True
+        return self._is_open
 
     def turn_on(self):
         self._flo.turn_valve_on(self._device_id)
@@ -87,6 +85,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
         data = self._flo.device(self._device_id)
         if data:
             self._hass.data[self.device_key] = data
+            self._is_open = ( data['systemMode'].get('target') == 'open' )
             LOG.info(f"Updated data for device {self._device_id}: {data}")
         else:
             LOG.error(f"Could not get state for device {self._device_id}")

@@ -75,7 +75,7 @@ def setup(hass, config):
     # create sensors/switches for all configured locations
     for location_id in location_ids:
         discovery_info = { CONF_LOCATION_ID: location_id }
-        for component in ['sensor', 'switch']:
+        for component in ['switch', 'binary_sensor', 'sensor']:
             discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True

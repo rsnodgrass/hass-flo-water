@@ -11,7 +11,7 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 - sensors: water flow rate (gpm), water pressure (psi), water temperature (&deg;F)
 - switching water supply on/off
 - multiple Flo devices and locations
-- changing the water leak monitoring mode (home, away, sleep)
+- changing the FloSense water leak monitoring mode (home, away, sleep)
 
 ## Installation
 
