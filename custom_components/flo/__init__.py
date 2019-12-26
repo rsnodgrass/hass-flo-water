@@ -50,7 +50,7 @@ def setup(hass, config):
 
     try:
         flo = PyFlo(username, password)
-        if not flo.is_connected():
+        if not flo.is_connected:
             LOG.error(f"Could not connect to Flo service with user {username}")
             return False
 

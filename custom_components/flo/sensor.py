@@ -3,6 +3,7 @@ Support for Flo water inflow monitoring and control devices
 
 FUTURE:
 - convert to async
+- should we have a "sensor" that shows whether the Flo device is "online" (e.g. connected to the Flo cloud + WiFi rssi/ssid)
 - should this use Flo's every 15-minutes average rollup instead of current telemetry?
 - could change to non-polling mode (since the "switch" does the actual polling, these would just update whenever the switch detects a state change)
 """

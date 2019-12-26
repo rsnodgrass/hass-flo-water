@@ -1,4 +1,4 @@
-# Flo Water Sensor for Home Assistant
+# Flo Water Control for Home Assistant
 
 Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn8tW?tag=rynoshark-20) for Home Assistant. [Flo](https://meetflo.com) is typically installed on the main water supply line and has sensors for flow rate, pressure, and temperature as well as shut off capabilities. Water shut off can be done manually, remotely, as well as automatically by Flo's emergency monitoring service when a leak is detected.
 
@@ -33,8 +33,7 @@ However you can also manually copy all the files in [flo/](https://github.com/rs
 Example configuration:
 
 ```yaml
-sensor:
-  - platform: flo
+flo:
     username: your@email.com
     password: your_flo_password
 ```
@@ -99,23 +98,24 @@ More complex cards can be created, for example the following shows both the basi
 
 #### Feature Requests
 
+Supports:
+
+- water temperature (Fahrenheit), flow rate (gpm), and pressure (psi)
+- switching water supply on/off
+- changing the automatic water leak monitoring mode (home, away, sleep)
+
 Priority improvements:
 
-- support switching water supply on/off
-- change to flo: domain configuration vs individual sensor (will be breaking change) to automatically create switches AND sensors (rather than having to configure independently)
-- support changing the automatic water leak monitoring mode (home, away, sleep)
 - support metric unit system (liter, C, kPa)
 - auto-create a pressure sensor for status of water flow (Ok, Warning, Critical)
 
 Other ideas (no plans to add currently):
 
+- support triggering the system test of a Flo device
+- support leak detection sensitivity settings (all, small, bigger, biggest)
 - support Flo alerts (leaks detected)
 - total water usage for the day/week
-- support multiple Flo devices and locations within a single Home Assistant instance
-- support triggering the system test of a Flo device
 - support Flo's fixtures beta feature breaking down usage by type (e.g. toilets, appliances, faucet, irrigation, etc)
-- support leak detection sensitivity settings (all, small, bigger, biggest)
-- create water sensor base class in Home Assistant (applies to other water sensing/shutoff valves)
 
 ## Unsupported 'master' branch status
 

@@ -1,1 +1,1 @@
-pyflowater>=0.0.3
+pyflowater>=0.0.4
