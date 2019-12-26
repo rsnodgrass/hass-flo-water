@@ -102,7 +102,7 @@ class FloTempSensor(FloEntity):
 
     @property
     def unit_of_measurement(self):
-        return TEMP_FAHRENHEIT # FIXME: use correct unit based on Flo device's config
+        return TEMP_FAHRENHEIT
 
     @property
     def state(self):
@@ -157,10 +157,11 @@ class FloMonitoringMode(FloEntity):
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
+        self._hass = hass
         self._device_id = device_id
         self._name = 'Flo Monitoring Mode'
         self._mode = None
-        self._hass = hass
+        self.update()
 
     @property
     def unit_of_measurement(self):
@@ -183,9 +184,11 @@ class FloMonitoringMode(FloEntity):
             self._mode = systemMode['lastKnown']
             return self._mode
         else:
-            return None
+            return self._mode
 
     def set_preset_mode(self, mode):
         self._hass[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
-        # update() or set directly?
+
+        # NOTE: there may be a delay between when the target mode is set on a Flo device and
+        # the actual change in operation. We manually set this.
         self._mode = mode

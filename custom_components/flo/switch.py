@@ -49,6 +49,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._name = name
         self._flo = flo
         self._device_id = device_id
+        self.update()
 
     @property
     def name(self):
@@ -73,3 +74,10 @@ class FloWaterValve(FloEntity, ToggleEntity):
         url = f"{FLO_V2_API_PREFIX}/devices/{self._device_id}"
         self._flo.query(url, extra_params={ "valve": { "target": "closed" }})
         
+    # NOTE: this updates the data periodically that is cached and shared by ALL sensors/switches
+    def update(self):
+        device_key = f"flo_device_{self._device_id}"
+        data = self._flo.device(self._device_id)
+        if data:
+            self._hass[device_key] = data
+            LOG.info(f"Updated data for device {self._device_id}: {data}")
