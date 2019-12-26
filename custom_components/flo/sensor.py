@@ -8,7 +8,6 @@ FUTURE:
 - could change to non-polling mode (since the "switch" does the actual polling, these would just update whenever the switch detects a state change)
 """
 import logging
-import json
 import voluptuous as vol
 import pprint
 
@@ -59,9 +58,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloTempSensor(hass, device_id) )
         sensors.append( FloPressureSensor(hass, device_id) )
         sensors.append( FloMonitoringMode(hass, device_id) )
-
-    for sensor in sensors:
-        sensor.update()
 
     add_sensors_callback(sensors)
 

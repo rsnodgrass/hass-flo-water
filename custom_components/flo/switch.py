@@ -56,8 +56,8 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._flo = flo
         self._name = 'Flo Water Valve'
         self._is_open = True # default to being open
-        self.update()
 
+        self.update()
         state = self.device_state
         if state:
             self._attrs['nickname'] = state['nickname']

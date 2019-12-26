@@ -2,7 +2,6 @@
 Support for Flo water inflow monitoring and control devices
 """
 import logging
-import json
 
 from homeassistant.components.binary_sensor import BinarySensorDevice
 from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
@@ -32,20 +31,17 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     sensors = []
     for device in location['devices']:
         device_id = device['id']
-        sensors.append( FloValveSensor(hass, device_id) )
-
-    for sensor in sensors:
-        sensor.update()
+        sensors.append( FloPhysicalValveSensor(hass, device_id) )
 
     add_sensors_callback(sensors)
 
 # pylint: disable=too-many-instance-attributes
-class FloValveSensor(FloEntity, BinarySensorDevice):
-    """Current Flo valve position sensor (may not yet match the Flo valve switch setting)"""
+class FloPhysicalValveSensor(FloEntity, BinarySensorDevice):
+    """Current physical Flo valve position (may not yet match the Flo valve switch setting)"""
 
     def __init__(self, hass, device_id):
         super().__init__(hass, device_id)
-        self._name = 'Flo Water Valve'
+        self._name = 'Flo Water Valve Position'
         self._is_open = True
         self.update()
 
