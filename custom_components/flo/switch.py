@@ -62,6 +62,11 @@ class FloWaterValve(FloEntity, ToggleEntity):
             self._attrs['nickname'] = state['nickname']
 
     @property
+    def icon(self):
+        return 'mdi:valve'
+#        return 'mdi:water-pump'
+
+    @property
     def is_on(self):
         """Return true if Flo control valve is on."""
         if self.device_state:
