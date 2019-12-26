@@ -74,7 +74,7 @@ def setup(hass, config):
 
     return True
 
-def discover_and_create_devices(hass, hass_config, conf):
+def discover_and_create_devices(hass, hass_config, flo_config):
     flo = hass.data[FLO_SERVICE]
 
     # create sensors and switches for ALL devices at ALL discovered Flo locations
@@ -83,6 +83,7 @@ def discover_and_create_devices(hass, hass_config, conf):
             CONF_LOCATION_ID: location_config['id']
         }
         for component in ['sensor', 'switch']:
+            LOG.info(f"Trying setup with config {platform_config}")
             discovery.load_platform(hass, component, FLO_DOMAIN, platform_config, hass_config)
 
 
