@@ -31,8 +31,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
 
-    flo = hass[FLO_SERVICE]
-    if not flo or not flo.is_connected():
+    flo = hass.data[FLO_SERVICE]
+    if flo == None or not flo.is_connected:
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 

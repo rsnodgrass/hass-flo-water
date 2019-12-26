@@ -23,7 +23,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
 
     flo = hass.data[FLO_SERVICE]
-    if not flo or not flo.is_connected():
+    if flo == None or not flo.is_connected:
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
