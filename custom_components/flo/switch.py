@@ -78,14 +78,14 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._flo.turn_valve_off(self._device_id)
         self._is_open = False
         
-    # NOTE: this updates the data periodically that is cached and shared by ALL sensors/switches
+    # NOTE: this updates the data periodically via polling, caches the results which are then shared by ALL sensors/switches
     def update(self):
         data = self._flo.device(self._device_id)
         if data:
             self._hass.data[self.device_key] = data
-            system_mode = data['systemMode']
-            self._is_open = system_mode['target'] == 'open'
-            LOG.info(f"Updated latest Flo system mode info {system_mode} for {self._device_id}" )
+            valve = data['valve']
+            self._is_open = valve['target'] == 'open'
+            LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
             #LOG.info(f"Updated data for device {self._device_id}: {data}")
         else:
             LOG.error(f"Could not get state for device {self._device_id}")
