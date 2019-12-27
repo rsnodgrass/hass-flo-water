@@ -98,8 +98,6 @@ More complex cards can be created, for example the following shows both the basi
 
 #### Feature Requests
 
-Priority improvements:
-
 - support metric unit system (liter, C, kPa)
 - auto-create a pressure sensor for status of water flow (Ok, Warning, Critical)
 
@@ -107,13 +105,9 @@ Other ideas (no plans to add currently):
 
 - support triggering the system test of a Flo device
 - support leak detection sensitivity settings (all, small, bigger, biggest)
-- support Flo alerts (leaks detected)
+- support FloSense alerts (leaks detected)
 - total water usage for the day/week
 - support Flo's fixtures beta feature breaking down usage by type (e.g. toilets, appliances, faucet, irrigation, etc)
-
-## Unsupported 'master' branch status
-
-* Currently converting over to pyflowater and the Flo V2 cloud APIs
 
 ## Automation Ideas
 
