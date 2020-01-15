@@ -2,6 +2,7 @@
 Support for Flo Water Control System inflow control device valve on/off
 """
 import logging
+import pprint
 import voluptuous as vol
 
 from homeassistant.helpers.entity import ToggleEntity
@@ -84,8 +85,13 @@ class FloWaterValve(FloEntity, ToggleEntity):
         if data:
             self._hass.data[self.device_key] = data
             valve = data['valve']
-            self._is_open = valve['target'] == 'open'
-            LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
-            #LOG.info(f"Updated data for device {self._device_id}: {data}")
+
+            target = valve.get('target')
+            if target:
+                self._is_open = valve['target'] == 'open'
+                LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
+                #LOG.info(f"Updated data for device {self._device_id}: {data}")
+            else:
+                LOG.warning(f"Could not update valve state for device {self._device_id}: {pprint.pformat(data)} / {valve}")
         else:
             LOG.error(f"Could not get state for device {self._device_id}")
