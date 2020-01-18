@@ -53,6 +53,9 @@ def setup(hass, config):
             LOG.error(f"Could not connect to Flo service with user {username}")
             return False
 
+        # save password to enable automatic re-authentication while this HA instance is running
+        flo.save_password(password)
+        
         hass.data[FLO_SERVICE] = flo
 
     except (ConnectTimeout, HTTPError) as ex:
