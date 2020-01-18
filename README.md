@@ -15,12 +15,12 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 
 ## Installation
 
+Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
+
 ### Versions
 
 The 'master' branch of this custom component is considered unstable, alpha quality and not guaranteed to work.
 Please make sure to use one of the official release branches when installing using HACS, see [what has changed in each version](https://github.com/rsnodgrass/hass-flo-water/releases).
-
-Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
 
 ### Step 1: Install Flo Custom Components
 
