@@ -93,7 +93,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
             elif lastKnown:
                 self._is_open = lastKnown == 'open'
             else:
-                LOG.warning(f"Could not update valve state for device {self._device_id}: {pprint.pformat(data)} / {valve}")
+#                LOG.debug(f"Could not update valve state for device {self._device_id}: %s / {valve}", pprint.pformat(data))
                 return
 
             LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
