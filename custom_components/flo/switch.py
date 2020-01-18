@@ -85,13 +85,18 @@ class FloWaterValve(FloEntity, ToggleEntity):
         if data:
             self._hass.data[self.device_key] = data
             valve = data['valve']
-
             target = valve.get('target')
+            lastKnown = valve.get('lastKnown')
+
             if target:
-                self._is_open = valve['target'] == 'open'
-                LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
-                #LOG.info(f"Updated data for device {self._device_id}: {data}")
+                self._is_open = target == 'open'
+            elif lastKnown:
+                self._is_open = lastKnown == 'open'
             else:
                 LOG.warning(f"Could not update valve state for device {self._device_id}: {pprint.pformat(data)} / {valve}")
+                return
+
+            LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
+
         else:
             LOG.error(f"Could not get state for device {self._device_id}")

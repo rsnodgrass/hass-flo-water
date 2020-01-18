@@ -172,7 +172,14 @@ class FloMonitoringMode(FloEntity):
     def update(self):
         """Update sensor state"""
         if self.device_state:
-            self._mode = self.device_state['systemMode'].get('target')
+            mode = self.device_state['systemMode']
+            target = mode.get('target')
+            lastKnown = mode.get('lastKnown')
+            if target:
+                self._mode = target
+            elif lastKnown:
+                self._mode = lastKnown
+
         return self._mode
 
     def set_preset_mode(self, mode):
