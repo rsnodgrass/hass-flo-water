@@ -24,7 +24,8 @@ LOG = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string,
-    vol.Required(CONF_STARTDATE): cv.date
+    # discovery doesn't seem to like cv.date so use string instead
+    vol.Required(CONF_STARTDATE): cv.string
 })
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
@@ -45,7 +46,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         location_id = config[CONF_LOCATION_ID]
         startdate = config[CONF_STARTDATE]
 
-    if not startdate:
+    if startdate:
+        startdate = datetime.strptime(startdate, '%Y-%m-%d')
+    else:
         # take the beginninng of the year
         now = dt_util.utcnow()
         startdate = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)

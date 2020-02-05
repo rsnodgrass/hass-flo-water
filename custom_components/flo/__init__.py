@@ -35,7 +35,7 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_LOCATION_ID): cv.ensure_list, # location_id: [ <locationId1>, <locationId2>, ... ]
-        vol.Optional(CONF_STARTDATE): cv.date
+        vol.Optional(CONF_STARTDATE): cv.string
     })
 }, extra=vol.ALLOW_EXTRA)
 
