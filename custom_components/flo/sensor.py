@@ -18,12 +18,13 @@ from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
 from pyflowater.const import FLO_V2_API_PREFIX, FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
-from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
+from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID, CONF_STARTDATE
 
 LOG = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_LOCATION_ID): cv.string
+    vol.Required(CONF_LOCATION_ID): cv.string,
+    vol.Required(CONF_STARTDATE): cv.date
 })
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
@@ -33,14 +34,22 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
 
     flo = hass.data[FLO_SERVICE]
-    if flo == None or not flo.is_connected:
+    if flo is None or not flo.is_connected:
         LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
         return False
 
     if discovery_info:
         location_id = discovery_info[CONF_LOCATION_ID]
+        startdate = discovery_info[CONF_STARTDATE]
     else: # manual config
         location_id = config[CONF_LOCATION_ID]
+        startdate = config[CONF_STARTDATE]
+
+    if not startdate:
+        # take the beginninng of the year
+        now = dt_util.utcnow()
+        startdate = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        LOG.warning(f"No startdate specified. Use {startdate.strftime('%Y-%m-%d')} instead.")
 
     location = flo.location(location_id)
     if not location:
@@ -49,7 +58,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     # iterate all devices and create a valve switch for each device
     sensors = []
-    sensors.append(FloConsumptionSensor(hass, flo, location_id))
+    sensors.append(FloConsumptionSensor(hass, flo, location_id, startdate))
     for device in location['devices']:
         device_id = device['id']
 
@@ -154,7 +163,7 @@ class FloPressureSensor(FloEntity):
 class FloConsumptionSensor(Entity):
     """Water consumption sensor for a Flo device location"""
 
-    def __init__(self, hass, flo, location_id):
+    def __init__(self, hass, flo, location_id, startdate):
         # super().__init__(hass, device_id)
         self._name = "Flo Water Consumption"
         self._state = None
@@ -162,7 +171,7 @@ class FloConsumptionSensor(Entity):
         self._flo = flo
         self._location_id = location_id
         self._attrs = {"location_id": location_id}
-        self.initial_update()
+        self.initial_update(startdate)
 
     @property
     def name(self):
@@ -190,14 +199,16 @@ class FloConsumptionSensor(Entity):
 
     def readConsumption(self, start, end, interval):
         res = self._flo.consumption(self._location_id, start.strftime(TIME_FMT), end.strftime(TIME_FMT), interval)
+        if not res:
+            LOG.error(f"Bad request: {start}:{end}:{interval}")
+            return 0
         return round(res['aggregations']['sumTotalGallonsConsumed'], 2)
 
-    def initial_update(self):
+    def initial_update(self, startdate):
         """ Initial update sensor state"""
         # get consumption for the whole year
         end = dt_util.utcnow()
-        start = end - timedelta(days=365)
-        self._state = self.readConsumption(start,end,'1m')
+        self._state = self.readConsumption(startdate, end, '1m')
         self._total = self._state
         LOG.info(
                 "Updated %s to %f %s", self._name, self._state, self.unit_of_measurement

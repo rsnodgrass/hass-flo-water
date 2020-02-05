@@ -28,12 +28,14 @@ NOTIFICATION_ID = 'flo_notification'
 
 CONF_AUTO_DISCOVER = 'discovery'
 CONF_LOCATION_ID = 'location_id'
+CONF_STARTDATE = 'startdate'
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_LOCATION_ID): cv.ensure_list # location_id: [ <locationId1>, <locationId2>, ... ]
+        vol.Optional(CONF_LOCATION_ID): cv.ensure_list, # location_id: [ <locationId1>, <locationId2>, ... ]
+        vol.Optional(CONF_STARTDATE): cv.date
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -67,6 +69,7 @@ def setup(hass, config):
         return False
 
     location_ids = conf.get(CONF_LOCATION_ID)
+    startdate = conf.get(CONF_STARTDATE)
 
     # if no location is specified, this will auto discover ALL Flo locations/devices and add them to Home Assistant
     if location_ids == None:
@@ -77,7 +80,7 @@ def setup(hass, config):
 
     # create sensors/switches for all configured locations
     for location_id in location_ids:
-        discovery_info = { CONF_LOCATION_ID: location_id }
+        discovery_info = { CONF_LOCATION_ID: location_id, CONF_STARTDATE: startdate }
         for component in ['switch', 'binary_sensor', 'sensor']:
             discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
 

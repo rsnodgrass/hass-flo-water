@@ -8,7 +8,7 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 
 ### Supported Features
 
-- sensors: water flow rate (gpm), water pressure (psi), water temperature (&deg;F)
+- sensors: water flow rate (gpm), water pressure (psi), water temperature (&deg;F), water consumption (g)
 - switching water supply on/off
 - multiple Flo devices and locations
 - changing the FloSense water leak monitoring mode (home, away, sleep)
@@ -36,6 +36,7 @@ Example configuration:
 flo:
     username: your@email.com
     password: your_flo_password
+    startdate: 2020-01-01
 ```
 
 ### Step 3: Add Lovelace Card
@@ -48,6 +49,7 @@ entities:
   - entity: sensor.flo_water_flow_rate
   - entity: sensor.flo_water_pressure
   - entity: sensor.flo_water_temperature
+  - entity: sensor.flo_water_consumption
 ```
 
 ![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/entities.png?raw=true)
@@ -106,7 +108,7 @@ Other ideas (no plans to add currently):
 - support triggering the system test of a Flo device
 - support leak detection sensitivity settings (all, small, bigger, biggest)
 - support FloSense alerts (leaks detected)
-- total water usage for the day/week
+- total water usage for the day/week (can be done with combination of consumption and utility meter)
 - support Flo's fixtures beta feature breaking down usage by type (e.g. toilets, appliances, faucet, irrigation, etc)
 
 ## Automation Ideas
