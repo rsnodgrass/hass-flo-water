@@ -159,7 +159,7 @@ class FloPressureSensor(FloEntity):
     def update(self):
         """Update sensor state"""
         state = self.get_telemetry('psi')
-        if self._state != round(state, 2):
+        if (self._state == None) or (self._state != round(state, 2)):
             self._state = round(state, 2)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
