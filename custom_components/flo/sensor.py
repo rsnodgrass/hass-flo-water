@@ -209,23 +209,21 @@ class FloConsumptionSensor(Entity):
 
     def initial_update(self, startdate):
         """ Initial update sensor state"""
-        # get consumption for the whole year
         end = dt_util.utcnow()
         self._state = self.readConsumption(startdate, end, '1m')
         self._total = self._state
-        LOG.info(
-                "Updated %s to %f %s", self._name, self._state, self.unit_of_measurement
-            )
+        LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
         self._last_end = end
 
     def update(self):
         """Update sensor state"""
         now = dt_util.utcnow()
+
+        # if we crossed over an hour boundary, add the last hour to the total
         if now.hour != self._last_end.hour:
-            # if we crossed over an hour boundary, add the last hour to the total
             end = now.replace(minute=0, second=0, microsecond=0)
             start = end - timedelta(hours=1)
-            prev_hour = self.readConsumption(start,end,'1h')
+            prev_hour = self.readConsumption(start, end, '1h')
             self._total += prev_hour
 
         # flo counts all previous consumption in the first second of the hour.
@@ -236,14 +234,13 @@ class FloConsumptionSensor(Entity):
             start = now - timedelta(hours=1)
             curr = self.readConsumption(start, now, '1h')
 
-        self.readConsumption(now-timedelta(days=365),now,'1m')
+        self.readConsumption(now - timedelta(days=365), now, '1m')
         state = self._total + curr
         self._last_end = now
+
         if self._state != state:
             self._state = state
-            LOG.info(
-                "Updated %s to %f %s", self._name, self._state, self.unit_of_measurement
-            )
+            LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
 # https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
 class FloMonitoringMode(FloEntity):
