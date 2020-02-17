@@ -81,6 +81,12 @@ class FloWaterValve(FloEntity, ToggleEntity):
         
     # NOTE: this updates the data periodically via polling, caches the results which are then shared by ALL sensors/switches
     def update(self):
+        # clear the cache ONCE per scan interval to force updates
+        # (the other sensors/switches read the latest cached data)
+        # TODO: make this more efficient rather than clear EVERY time
+        self._flo.clear_cache()
+
+        # call the Flo cloud service
         data = self._flo.device(self._device_id)
         if data:
             self._hass.data[self.device_key] = data
