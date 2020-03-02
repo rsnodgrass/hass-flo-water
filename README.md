@@ -6,6 +6,8 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 ![beta_badge](https://img.shields.io/badge/maturity-Beta-yellow.png)
+![release_badge](https://img.shields.io/github/v/release/rsnodgrass/hass-flo-water.svg)
+![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-flo-water.svg)
 
 ## Support
 
