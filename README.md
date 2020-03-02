@@ -6,27 +6,34 @@ Support for [Flo Smart water monitoring and control device](https://amzn.to/2WBn
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
+## Support
+
+Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
+
+This integration was developed to cover use cases for my home integration, which I wanted to contribute to the community. Additional features beyond what has already been provided are the responsibility of the community to implement (unless trivial to add).
+
 ### Supported Features
 
 - sensors: water flow rate (gpm), water pressure (psi), water temperature (&deg;F), water consumption (g)
-- switching water supply on/off
 - multiple Flo devices and locations
+
+#### Not Supported
+
+- switching water supply on/off
 - changing the FloSense water leak monitoring mode (home, away, sleep)
 
 ## Installation
 
-Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
-
-### Versions
+#### Versions
 
 The 'master' branch of this custom component is considered unstable, alpha quality and not guaranteed to work.
 Please make sure to use one of the official release branches when installing using HACS, see [what has changed in each version](https://github.com/rsnodgrass/hass-flo-water/releases).
 
 ### Step 1: Install Flo Custom Components
 
-Easiest installation is by setting up [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs), and then adding the "Integration" repository: rsnodgrass/hass-flo-water.
+Make sure that [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) is setup, then add the "Integration" repository: rsnodgrass/hass-flo-water.
 
-However you can also manually copy all the files in [flo/](https://github.com/rsnodgrass/hass-flo-water/custom_components/flo) directory to `/config/custom_components/flo` on your Home Assistant installation.
+Note: Manual installation by direct download and copying is not supported, if you have issues, please first try installing this integration with HACS.
 
 ### Step 2: Configure Sensors
 
