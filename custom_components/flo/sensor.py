@@ -61,10 +61,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     # iterate all devices and create a valve switch for each device
     sensors = []
-    sensors.append(FloConsumptionSensor(hass, flo, location_id, startdate))
-    for device in location['devices']:
-        device_id = device['id']
-
+    for device_details in location['devices']:
+        device_id = device_details['id']
+        sensors.append( FloConsumptionSensor(hass, flo, locaton_id, device_details, startdate) )
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
         sensors.append( FloPressureSensor(hass, device_id) )
@@ -103,6 +102,9 @@ class FloRateSensor(FloEntity):
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
+    def unique_id(self):
+        return f"flo_rate_{self._device_id}"
+
 class FloTempSensor(FloEntity):
     """Water temp sensor for a Flo device"""
 
@@ -132,6 +134,8 @@ class FloTempSensor(FloEntity):
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
+    def unique_id(self):
+        return f"flo_temp_{self._device_id}"
 
 class FloPressureSensor(FloEntity):
     """Water pressure sensor for a Flo device"""
@@ -162,18 +166,28 @@ class FloPressureSensor(FloEntity):
         if state is not None and self._state != round(state, 2):
             self._state = round(state, 2)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
+            
+    def unique_id(self):
+        return f"flo_pressure_{self._device_id}"
 
 class FloConsumptionSensor(Entity):
     """Water consumption sensor for a Flo device location"""
 
-    def __init__(self, hass, flo, location_id, startdate):
+    def __init__(self, hass, flo, location_id, device_details, startdate):
         # super().__init__(hass, device_id)
         self._name = "Flo Water Consumption"
         self._state = None
         self._last_end = 0
         self._flo = flo
+
         self._location_id = location_id
-        self._attrs = {"location_id": location_id}
+        self._device_details = device_details
+
+        self._attrs = {
+            'location_id': location_id
+        }
+        self._attrs.update(device_details)
+
         self.initial_update(startdate)
 
     @property
@@ -201,9 +215,13 @@ class FloConsumptionSensor(Entity):
         return "mdi:gauge"
 
     def readConsumption(self, start, end, interval):
-        res = self._flo.consumption(self._location_id, start.strftime(TIME_FMT), end.strftime(TIME_FMT), interval)
+        res = self._flo.consumption(self._location_id,
+                                    self._device_details['macAddress'],
+                                    start.strftime(TIME_FMT),
+                                    end.strftime(TIME_FMT),
+                                    interval)
         if not res:
-            LOG.error(f"Bad request: {start}:{end}:{interval}")
+            LOG.error(f"Bad Flo consumption response: {start}:{end}:{interval}: %s", res)
             return 0
         return round(res['aggregations']['sumTotalGallonsConsumed'], 2)
 
@@ -241,6 +259,10 @@ class FloConsumptionSensor(Entity):
         if self._state != state:
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
+
+    def unique_id(self):
+        return f"flo_consumption_{self._device_details['id']}"
+
 
 # https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
 class FloMonitoringMode(FloEntity):
@@ -289,3 +311,6 @@ class FloMonitoringMode(FloEntity):
         # there may be a delay between when the target mode is set on a Flo device and
         # the actual change in operation. We manually set this.
         self._mode = mode
+
+    def unique_id(self):
+        return f"flo_mode_{self._device_id}"
