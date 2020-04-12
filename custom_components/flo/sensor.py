@@ -30,6 +30,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
+# avoid DDoS Flo's cloud service
+MIN_SCAN_INTERVAL = 60 # seconds
+SCAN_INTERVAL = timedelta(seconds=(5 * 60)) # 5 minutes 
+
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     """Setup the Flo water inflow control sensor"""
@@ -63,7 +67,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     sensors = []
     for device_details in location['devices']:
         device_id = device_details['id']
-        sensors.append( FloConsumptionSensor(hass, flo, locaton_id, device_details, startdate) )
+        sensors.append( FloConsumptionSensor(hass, flo, location_id, device_details, startdate) )
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
         sensors.append( FloPressureSensor(hass, device_id) )
