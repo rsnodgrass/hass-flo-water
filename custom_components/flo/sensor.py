@@ -32,7 +32,7 @@ TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
 # avoid DDoS Flo's cloud service
 MIN_SCAN_INTERVAL = 60 # seconds
-SCAN_INTERVAL = timedelta(seconds=(5 * 60)) # 5 minutes 
+SCAN_INTERVAL = timedelta(seconds=60)
 
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
