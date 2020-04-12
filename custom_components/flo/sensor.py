@@ -56,7 +56,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         # take the beginninng of the year
         now = dt_util.utcnow()
         startdate = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-        LOG.warning(f"No startdate specified. Use {startdate.strftime('%Y-%m-%d')} instead.")
+        LOG.info(f"No consumption startdate specified...using beginning of the year: {startdate.strftime('%Y-%m-%d')}")
 
     location = flo.location(location_id)
     if not location:
@@ -188,7 +188,8 @@ class FloConsumptionSensor(Entity):
         self._device_details = device_details
 
         self._attrs = {
-            'location_id': location_id
+            'location_id': location_id,
+            'start_date': startdate
         }
         self._attrs.update(device_details)
 
