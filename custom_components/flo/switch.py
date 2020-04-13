@@ -106,3 +106,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
 
         else:
             LOG.error(f"Could not get state for device {self._device_id}")
+
+    @property
+    def unique_id(self):
+        return f"flo_valve_{self._device_id}"

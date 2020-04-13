@@ -106,6 +106,7 @@ class FloRateSensor(FloEntity):
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
+    @property
     def unique_id(self):
         return f"flo_rate_{self._device_id}"
 
@@ -138,6 +139,7 @@ class FloTempSensor(FloEntity):
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
+    @property
     def unique_id(self):
         return f"flo_temp_{self._device_id}"
 
@@ -171,6 +173,7 @@ class FloPressureSensor(FloEntity):
             self._state = round(state, 2)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
             
+    @property
     def unique_id(self):
         return f"flo_pressure_{self._device_id}"
 
@@ -265,6 +268,7 @@ class FloConsumptionSensor(Entity):
             self._state = state
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
+    @property
     def unique_id(self):
         return f"flo_consumption_{self._device_details['id']}"
 
@@ -317,5 +321,6 @@ class FloMonitoringMode(FloEntity):
         # the actual change in operation. We manually set this.
         self._mode = mode
 
+    @property
     def unique_id(self):
         return f"flo_mode_{self._device_id}"

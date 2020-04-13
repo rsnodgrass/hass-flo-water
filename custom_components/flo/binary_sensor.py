@@ -62,3 +62,7 @@ class FloPhysicalValveSensor(FloEntity, BinarySensorDevice):
         if self.device_state:
             valve = self.device_state['valve']
             self._is_open = ( valve['lastKnown'] == 'open' )
+
+    @property
+    def unique_id(self):
+        return f"flo_physical_valve_{self._device_id}"
