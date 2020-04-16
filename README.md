@@ -101,7 +101,7 @@ More complex cards can be created, for example the following shows both the basi
 * [Community support for Home Assistant Flo sensor](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532)
 * [Check price of Flo water monitoring device on Amazon.com](https://amzn.to/2WBn8tW?tag=rynoshark-20)
 * [Flo by Moen](https://meetflo.com) (official product page)
-* [15% OFF purchases of Flo](https://meetflo.referralrock.com/l/818758/)
+* [15% OFF purchases of Flo](https://l.facebook.com/l.php?u=http%3A%2F%2Ffbuy.me%2Fo7V9I%3Ffbm%3D16505%26fbclid%3DIwAR15JOQdK5VYZpQqKkmFcMrWIKDe8XyR4ecrEYU2ZWiBzT08GwSxVCzq7sA&h=AT1QzphEpsIm7u4bgH8j1mtOifoyCHenHjndQvsD1D2d7o3FD8Xni24PYC59NA3lhKrZGHUWA6R2BIdzvqCM_Zt5x6kgmKxeBI36p5W0gAgi4bKaYj6kjgRMTxpARYJEJaGpvzw&__tn__=H-R&c[0]=AT33dWStfMtxxLDbsvLiMQ7_USqTAwNn1AZpODVitM-88PyL-dNPwrBGjc-taRETr07nikaNpoOlmPclmak0KlONJjlG3z-ijZJRVZEE1Vhzkrkij_XXCGsTzRnwA_57qIJAiRsQCZmviPXt865_Zpv-VkNGu3tv3h9yMZL_tncm8w1Z)
 * [pyflowater](https://github.com/rsnodgrass/pyflowater)
 
 ## Known Issues
