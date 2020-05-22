@@ -36,7 +36,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     add_sensors_callback(sensors)
 
 # pylint: disable=too-many-instance-attributes
-class FloPhysicalValveSensor(FloEntity, BinarySensorDevice):
+class FloPhysicalValveSensor(FloEntity, BinarySensorEntity):
     """Current physical Flo valve position (may not yet match the Flo valve switch setting)"""
 
     def __init__(self, hass, device_id):
