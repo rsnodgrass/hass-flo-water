@@ -3,7 +3,7 @@ Support for Flo water inflow monitoring and control devices
 """
 import logging
 
-from homeassistant.components.binary_sensor import BinarySensorDevice
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
