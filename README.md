@@ -45,9 +45,9 @@ Example configuration:
 
 ```yaml
 flo:
-    username: your@email.com
-    password: your_flo_password
-    startdate: 2020-01-01
+  username: your@email.com
+  password: your_flo_password
+  startdate: 2020-01-01
 ```
 
 ### Step 3: Add Lovelace Card
