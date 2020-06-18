@@ -20,30 +20,35 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 # pylint: disable=unused-argument
 # NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
+
+
 def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
 
     flo = hass.data[FLO_SERVICE]
     if flo == None or not flo.is_connected:
-        LOG.warning("No connection to Flo service, ignoring setup of platform sensor")
+        LOG.warning(
+            "No connection to Flo service, ignoring setup of platform sensor")
         return False
 
     if discovery_info:
         location_id = discovery_info[CONF_LOCATION_ID]
-    else: # manual config
+    else:  # manual config
         location_id = config[CONF_LOCATION_ID]
 
     location = flo.location(location_id)
     if not location:
-        LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo control valves")
+        LOG.warning(
+            f"Flo location {location_id} not found, ignoring creation of Flo control valves")
         return False
 
     # iterate all devices and create a valve switch for each device
     switches = []
     for device in location['devices']:
-        switches.append( FloWaterValve(hass, flo, device['id']) )
+        switches.append(FloWaterValve(hass, flo, device['id']))
 
     add_switches_callback(switches)
+
 
 class FloWaterValve(FloEntity, ToggleEntity):
     """Flo switch to turn on/off water flow."""
@@ -52,7 +57,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
         super().__init__(hass, device_id)
         self._flo = flo
         self._name = 'Flo Water Valve'
-        self._is_open = True # default to being open
+        self._is_open = True  # default to being open
 
         self.update()
         state = self.device_state
@@ -78,7 +83,12 @@ class FloWaterValve(FloEntity, ToggleEntity):
     def turn_off(self):
         self._flo.turn_valve_off(self._device_id)
         self._is_open = False
-        
+
+    @property:
+    def should_poll():
+        # this is the coordinator for all Flo data updates, ensure polling is turned on
+        return True
+
     # NOTE: this updates the data periodically via polling, caches the results which are then shared by ALL sensors/switches
     def update(self):
         # clear the cache ONCE per scan interval to force updates
@@ -99,10 +109,11 @@ class FloWaterValve(FloEntity, ToggleEntity):
             elif lastKnown:
                 self._is_open = lastKnown == 'open'
             else:
-#                LOG.debug(f"Could not update valve state for device {self._device_id}: %s / {valve}", pprint.pformat(data))
+                #                LOG.debug(f"Could not update valve state for device {self._device_id}: %s / {valve}", pprint.pformat(data))
                 return
 
-            LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}" )
+            LOG.info(
+                f"Updated latest Flo system mode info {valve} for {self._device_id}")
 
         else:
             LOG.error(f"Could not get state for device {self._device_id}")
