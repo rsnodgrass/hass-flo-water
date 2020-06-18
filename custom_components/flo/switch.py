@@ -4,6 +4,7 @@ Support for Flo Water Control System inflow control device valve on/off
 import logging
 import pprint
 import voluptuous as vol
+from datetime import timedelta
 
 from homeassistant.helpers.entity import ToggleEntity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
@@ -14,13 +15,15 @@ from . import FloEntity, FLO_DOMAIN, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
+ # default to 1 minute, don't DDoS Flo servers
+SCAN_INTERVAL = timedelta(seconds=60)
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
 })
 
 # pylint: disable=unused-argument
 # NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
-
 
 def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
