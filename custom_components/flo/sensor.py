@@ -67,7 +67,10 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     sensors = []
     for device_details in location['devices']:
         device_id = device_details['id']
+
+        # the consumption sensor is the coordinator for updating ALL other sensors
         sensors.append( FloConsumptionSensor(hass, flo, location_id, device_details, startdate) )
+
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
         sensors.append( FloPressureSensor(hass, device_id) )
@@ -103,7 +106,7 @@ class FloRateSensor(FloEntity):
         """Update sensor state"""
         state = self.get_telemetry('gpm')
         if self._state != state:
-            self._state = state
+            self.update_state(state)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
     @property
@@ -136,7 +139,7 @@ class FloTempSensor(FloEntity):
         """Update sensor state"""
         state = self.get_telemetry('tempF')
         if self._state != state:
-            self._state = state
+            self.update_state(state)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
     @property
@@ -169,8 +172,9 @@ class FloPressureSensor(FloEntity):
     def update(self):
         """Update sensor state"""
         state = self.get_telemetry('psi')
-        if state is not None and self._state != round(state, 2):
-            self._state = round(state, 2)
+        current_state = round(state, 2)
+        if state is not None and self._state != current_state:
+            self.update_state(current_state)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
             
     @property
@@ -265,8 +269,12 @@ class FloConsumptionSensor(Entity):
         self._last_end = now
 
         if self._state != state:
-            self._state = state
+            self.update_state(state)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
+
+        # as the coordinator, always update hte entire device details for debugging purposes
+#        self._attrs.update(device_details)
+#        self._device_details
 
     @property
     def unique_id(self):

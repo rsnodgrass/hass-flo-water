@@ -63,8 +63,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._is_open = True  # default to being open
 
         self.update()
-        state = self.device_state
-        if state:
+        if self.device_state:
             self._attrs['nickname'] = state['nickname']
 
     @property
@@ -89,7 +88,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
 
     @property
     def should_poll(self):
-        """This is the coordinator for all other Flo data and sensor updates, ensure polling is always ON!"""
+        """This switch is the coordinator for all other dependent Flo data and sensor updates, ensure polling is always ON!"""
         return True
 
     # NOTE: this updates the data periodically via polling, caches the results which are then shared by ALL sensors/switches
@@ -112,11 +111,10 @@ class FloWaterValve(FloEntity, ToggleEntity):
             elif lastKnown:
                 self._is_open = lastKnown == 'open'
             else:
-                #                LOG.debug(f"Could not update valve state for device {self._device_id}: %s / {valve}", pprint.pformat(data))
+                # LOG.debug(f"Could not update valve state for device {self._device_id}: %s / {valve}", pprint.pformat(data))
                 return
 
-            LOG.info(
-                f"Updated latest Flo system mode info {valve} for {self._device_id}")
+            LOG.info(f"Updated latest Flo system mode info {valve} for {self._device_id}")
 
         else:
             LOG.error(f"Could not get state for device {self._device_id}")

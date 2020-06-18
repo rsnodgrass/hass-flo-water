@@ -9,6 +9,7 @@ import logging
 import json
 import requests
 import time
+import datetime
 import voluptuous as vol
 from requests.exceptions import HTTPError, ConnectTimeout
 
@@ -104,6 +105,12 @@ class FloEntity(Entity):
         return self._name
 
     @property
+    def should_poll(self):
+        """A coordinate manually updates all the sensors, so ensure polling ON for HA to detect state changes!"""
+        # FIXME: we could make these dependent sensors not be polling, since the coordinator could let HA know what changes
+        return True
+
+    @property
     def device_state_attributes(self):
         """Return the device state attributes."""
         return self._attrs
@@ -123,3 +130,10 @@ class FloEntity(Entity):
             return current_states[field]
         else:
             return None
+
+    def update_state(self, state):
+        self._state = state
+
+        # For debugging, mark the attribute with current timestamp to indicate updated
+        if self._attrs:
+            self._attrs['last_updated'] = datetime.(timezone.utc)
