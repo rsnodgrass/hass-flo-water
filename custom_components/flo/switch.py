@@ -84,9 +84,9 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._flo.turn_valve_off(self._device_id)
         self._is_open = False
 
-    @property:
-    def should_poll():
-        # this is the coordinator for all Flo data updates, ensure polling is turned on
+    @property
+    def should_poll(self):
+        """This is the coordinator for all other Flo data and sensor updates, ensure polling is always ON!"""
         return True
 
     # NOTE: this updates the data periodically via polling, caches the results which are then shared by ALL sensors/switches
