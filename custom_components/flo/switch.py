@@ -63,7 +63,8 @@ class FloWaterValve(FloEntity, ToggleEntity):
         self._is_open = True  # default to being open
 
         self.update()
-        if self.device_state:
+        state = self.device_state
+        if state:
             self._attrs['nickname'] = state['nickname']
 
     @property
@@ -75,7 +76,7 @@ class FloWaterValve(FloEntity, ToggleEntity):
 
     @property
     def is_on(self):
-        """Return true if Flo control valve is on."""
+        """Return true if Flo control valve is open."""
         return self._is_open
 
     def turn_on(self):
