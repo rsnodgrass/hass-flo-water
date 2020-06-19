@@ -220,7 +220,7 @@ class FloConsumptionSensor(Entity):
     @property
     def state(self):
         """Gallons"""
-        return self._state
+        return round(self._state, 2)
 
     @property
     def icon(self):

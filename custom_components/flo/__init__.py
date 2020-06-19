@@ -15,7 +15,8 @@ from requests.exceptions import HTTPError, ConnectTimeout
 
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
-from homeassistant.const import ( CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL )
+from homeassistant.const import (
+    CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL)
 import homeassistant.helpers.config_validation as cv
 
 from pyflowater import PyFlo
@@ -35,13 +36,15 @@ CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_LOCATION_ID): cv.ensure_list, # location_id: [ <locationId1>, <locationId2>, ... ]
+        # location_id: [ <locationId1>, <locationId2>, ... ]
+        vol.Optional(CONF_LOCATION_ID): cv.ensure_list,
         vol.Optional(CONF_STARTDATE): cv.string
     })
 }, extra=vol.ALLOW_EXTRA)
 
 # cache expiry in minutes; TODO: make this configurable (with a minimum to prevent DDoS)
-FLO_CACHE_EXPIRY=10
+FLO_CACHE_EXPIRY = 10
+
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
@@ -58,7 +61,7 @@ def setup(hass, config):
 
         # save password to enable automatic re-authentication while this HA instance is running
         flo.save_password(password)
-        
+
         hass.data[FLO_SERVICE] = flo
 
     except (ConnectTimeout, HTTPError) as ex:
@@ -77,15 +80,19 @@ def setup(hass, config):
         location_ids = []
         for location in flo.locations():
             location_ids.append(location['id'])
-            LOG.info(f"Discovered Flo location {location['id']} ({location['nickname']})")
+            LOG.info(
+                f"Discovered Flo location {location['id']} ({location['nickname']})")
 
     # create sensors/switches for all configured locations
     for location_id in location_ids:
-        discovery_info = { CONF_LOCATION_ID: location_id, CONF_STARTDATE: startdate }
+        discovery_info = {CONF_LOCATION_ID: location_id,
+                          CONF_STARTDATE: startdate}
         for component in ['switch', 'binary_sensor', 'sensor']:
-            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
+            discovery.load_platform(
+                hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True
+
 
 class FloEntity(Entity):
     """Base Entity class for Flo water inflow control device"""
@@ -136,4 +143,4 @@ class FloEntity(Entity):
 
         # For debugging, mark the attribute with current timestamp to indicate updated
         if self._attrs:
-            self._attrs['last_updated'] = datetime.(timezone.utc)
+            self._attrs['last_updated'] = datetime.datetime.now.isoformat()
