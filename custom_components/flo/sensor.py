@@ -106,6 +106,12 @@ class FloRateSensor(FloEntity):
         """Update sensor state"""
         state = self.get_telemetry('gpm')
         if self._state != state:
+
+            # Flo has (temporarily?) deprecated their temperature API and returns VERY high temps,
+            # so DO NOT update the state IF the temperatures are high.
+            if int(state) > 140:
+                return
+
             self.update_state(state)
             LOG.info("Updated %s to %f %s", self._name, self._state, self.unit_of_measurement)
 
