@@ -143,4 +143,4 @@ class FloEntity(Entity):
 
         # For debugging, mark the attribute with current timestamp to indicate updated
         if self._attrs:
-            self._attrs['last_updated'] = datetime.datetime.now.isoformat()
+            self._attrs['last_updated'] = datetime.datetime.now.strftime("%m/%d/%Y %H:%M:%S")
