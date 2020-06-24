@@ -2,6 +2,8 @@
 
 Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsnodgrass) for Home Assistant. [Flo](http://fbuy.me/v/rsnodgrass) is typically installed on the main water supply line and has sensors for flow rate, pressure, and temperature as well as shut off capabilities. Water shut off can be done manually, remotely, as well as automatically by Flo's emergency monitoring service when a leak is detected.
 
+**NOTE: FLO DOES NOT PROVIDE AN OFFICIALLY SUPPORTED API, THUS FLO CHANGES MAY BREAK THIS INTEGRATION AT ANY TIME.**
+
 ![beta_badge](https://img.shields.io/badge/maturity-Beta-yellow.png)
 ![release_badge](https://img.shields.io/github/v/release/rsnodgrass/hass-flo-water.svg)
 ![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-flo-water.svg)
