@@ -187,7 +187,7 @@ class FloPressureSensor(FloEntity):
     def unique_id(self):
         return f"flo_pressure_{self._device_id}"
 
-class FloConsumptionSensor(Entity):
+class FloConsumptionSensor(FloEntity):
     """Water consumption sensor for a Flo device location"""
 
     def __init__(self, hass, flo, location_id, device_details, startdate):
