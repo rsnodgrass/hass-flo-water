@@ -145,3 +145,23 @@ class FloEntity(Entity):
         if self._attrs:
             now = datetime.datetime.now()
             self._attrs['last_updated'] = now.strftime("%m/%d/%Y %H:%M:%S")
+
+
+
+
+
+    async def refresh(self) -> bool:
+        """Refresh ecobee tokens and update config entry."""
+        _LOGGER.debug("Refreshing ecobee tokens and updating config entry")
+        result = await self._hass.async_add_executor_job(self.ecobee.refresh_tokens)
+        if result == True:
+            self._hass.config_entries.async_update_entry(
+                self._entry,
+                data={
+                    CONF_API_KEY: self.ecobee.config[ECOBEE_API_KEY],
+                    CONF_REFRESH_TOKEN: self.ecobee.config[ECOBEE_REFRESH_TOKEN],
+                },
+            )
+            return True
+        _LOGGER.error("Error refreshing ecobee tokens")
+        return False
