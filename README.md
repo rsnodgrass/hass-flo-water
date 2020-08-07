@@ -108,8 +108,8 @@ More complex cards can be created, for example the following shows both the basi
 
 ## Known Issues
 
+* Flo has removed the water temperature reading as of June 2020; this is no longer available (replaced by "area temp")
 * BUG: Flo accounts with multiple houses currently don't work. Only a single Flo device per account
-* BUG: does not yet support the Flo v2 API
 
 #### Feature Requests
 
