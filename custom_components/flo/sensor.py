@@ -329,11 +329,14 @@ class FloMonitoringMode(FloEntity):
             LOG.info(f"Invalid mode '{mode}' for FloSense monitoring, ignoring!")
             return
 
-        self._hass.data[FLO_SERVICE].service.set_preset_mode(self._device_id, mode)
+        flo = self._hass.data[FLO_SERVICE].service
 
-        # there may be a delay between when the target mode is set on a Flo device and
-        # the actual change in operation. We manually set this.
-        self._mode = mode
+        if mode == FLO_HOME:
+            flo.set_mode_home(self._location_id)
+        elif mode == FLO_AWAY:
+            flo.set_mode_away(self._location_id)
+        elif mode == FLO_SLEEP:
+            flo.set_mode_sleep(self._location_id)
 
     @property
     def unique_id(self):

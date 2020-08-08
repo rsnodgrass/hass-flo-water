@@ -123,3 +123,4 @@ class FloWaterValve(FloEntity, ToggleEntity):
     @property
     def unique_id(self):
         return f"flo_valve_{self._device_id}"
+    
