@@ -17,7 +17,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
-from pyflowater.const import FLO_V2_API_PREFIX, FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
+from pyflowater.const import FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
 from . import FloEntity, FLO_SERVICE, CONF_LOCATION_ID, CONF_STARTDATE
 
 LOG = logging.getLogger(__name__)

@@ -10,7 +10,6 @@ from homeassistant.helpers.entity import ToggleEntity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
 
-from pyflowater.const import FLO_V2_API_PREFIX
 from . import FloEntity, FLO_DOMAIN, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
