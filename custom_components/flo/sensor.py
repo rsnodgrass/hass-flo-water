@@ -69,8 +69,8 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         device_id = device_details['id']
 
         # the consumption sensor is the coordinator for updating ALL other sensors
-        sensors.append( FloConsumptionSensor(hass, flo, location_id, device_details, startdate) )
-        sensors.append( FloMonitoringMode(hass, flo, location_id) )
+        sensors.append( FloConsumptionSensor(hass, location_id, device_details, startdate) )
+        sensors.append( FloMonitoringMode(hass, location_id) )
 
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
