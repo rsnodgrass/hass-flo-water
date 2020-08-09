@@ -70,11 +70,11 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
         # the consumption sensor is the coordinator for updating ALL other sensors
         sensors.append( FloConsumptionSensor(hass, flo, location_id, device_details, startdate) )
+        sensors.append( FloMonitoringMode(hass, flo, location_id) )
 
         sensors.append( FloRateSensor(hass, device_id) )
         sensors.append( FloTempSensor(hass, device_id) )
         sensors.append( FloPressureSensor(hass, device_id) )
-        sensors.append( FloMonitoringMode(hass, device_id) )
 
     add_sensors_callback(sensors)
 
@@ -190,12 +190,11 @@ class FloPressureSensor(FloEntity):
 class FloConsumptionSensor(FloEntity):
     """Water consumption sensor for a Flo device location"""
 
-    def __init__(self, hass, flo, location_id, device_details, startdate):
+    def __init__(self, hass, location_id, device_details, startdate):
         # super().__init__(hass, device_id)
         self._name = "Flo Water Consumption"
         self._state = None
         self._last_end = 0
-        self._flo = flo
 
         self._location_id = location_id
         self._device_details = device_details
@@ -233,11 +232,12 @@ class FloConsumptionSensor(FloEntity):
         return "mdi:gauge"
 
     def readConsumption(self, start, end, interval):
-        res = self._flo.consumption(self._location_id,
-                                    self._device_details['macAddress'],
-                                    start.strftime(TIME_FMT),
-                                    end.strftime(TIME_FMT),
-                                    interval)
+        flo = self._hass.data[FLO_SERVICE].service
+        res = flo.consumption(self._location_id,
+                              self._device_details['macAddress'],
+                              start.strftime(TIME_FMT),
+                              end.strftime(TIME_FMT),
+                              interval)
         if not res:
             LOG.error(f"Bad Flo consumption response: {start}:{end}:{interval}: %s", res)
             return 0
@@ -291,9 +291,10 @@ class FloConsumptionSensor(FloEntity):
 class FloMonitoringMode(FloEntity):
     """Sensor returning current monitoring mode for the Flo device"""
 
-    def __init__(self, hass, device_id):
-        super().__init__(hass, device_id)
+    def __init__(self, hass, location_id):
+        #super().__init__(hass, device_id)
         self._name = 'Flo Monitoring Mode'
+        self._location_id = location_id
         self._mode = None
         self.update()
 
@@ -330,7 +331,6 @@ class FloMonitoringMode(FloEntity):
             return
 
         flo = self._hass.data[FLO_SERVICE].service
-        flo.login() # force re-login since service call seems to fail if not recently authenticated
 
         if mode == FLO_HOME:
             flo.set_mode_home(self._location_id)
@@ -341,4 +341,4 @@ class FloMonitoringMode(FloEntity):
 
     @property
     def unique_id(self):
-        return f"flo_mode_{self._device_id}"
+        return f"flo_mode_{self._location_id}"
