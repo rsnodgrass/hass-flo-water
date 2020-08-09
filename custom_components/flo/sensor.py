@@ -330,6 +330,7 @@ class FloMonitoringMode(FloEntity):
             return
 
         flo = self._hass.data[FLO_SERVICE].service
+        flo.login() # force re-login since service call seems to fail if not recently authenticated
 
         if mode == FLO_HOME:
             flo.set_mode_home(self._location_id)
