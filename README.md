@@ -49,8 +49,11 @@ Example configuration:
 flo:
   username: your@email.com
   password: your_flo_password
+  location_id: your_location_id
   startdate: 2020-01-01
 ```
+
+Find Your Location ID with the [pyflowater library](https://github.com/rsnodgrass/pyflowater/blob/master/example-client.py).  If you don't set the location_id you will not see the sensors.
 
 ### Step 3: Add Lovelace Card
 
