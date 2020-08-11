@@ -12,17 +12,17 @@ import time
 import logging
 import voluptuous as vol
 
-from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE, CONF_SCAN_INTERVAL
+from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE, CONF_SCAN_INTERVAL, ATTR_ENTITY_ID
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
 from pyflowater.const import FLO_MODES
 from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
-
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
@@ -30,6 +30,14 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
+ATTR_MODE = 'mode'
+
+SERVICE_SET_MODE = 'set_mode'
+SERVICE_SET_MODE_SCHEMA = {
+    vol.Required(ATTR_ENTITY_ID): cv.time_period,
+    vol.Required(ATTR_MODE): vol.In(FLO_MODES)
+}
+SERVICE_SET_MODE_SIGNAL = f"{SERVICE_SET_MODE}_%s"
 
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
@@ -76,6 +84,12 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     add_sensors_callback(sensors)
 
+    # register any exposed services
+    def service_set_mode(call):
+        entity_id = call.data[ATTR_ENTITY_ID]
+        mode = call.data[ATTR_MODE]
+        async_dispatcher_send(hass, SERVICE_SET_MODE_SIGNAL.format(entity_id))
+    hass.services.register(FLO_DOMAIN, SERVICE_SET_MODE, service_set_mode, SERVICE_SET_MODE)
 
 class FloRateSensor(FloDeviceEntity):
     """Water flow rate sensor for a Flo device"""
@@ -271,13 +285,21 @@ class FloMonitoringMode(FloLocationEntity):
         mode = self.location_state.get('systemMode')
         return self.update_state(mode.get('target'))
 
-    def set_preset_mode(self, mode):
+    def SET_mode(self, mode):
         if not mode in FLO_MODES:
             LOG.info(f"Invalid mode '{mode}' for FloSense monitoring, IGNORING! (valid={FLO_MODES})")
             return
 
         self.flo_service.set_mode(self._location_id, mode)
         self.update_state(mode)
+
+    async def async_added_to_hass(self):
+        """Run when entity is about to be added to hass."""
+        async_dispatcher_connect(
+            self.hass,
+            SERVICE_SET_MODE_SIGNAL.format(self.entity_id),
+            self.SET_mode
+        )
 
     @property
     def unique_id(self):

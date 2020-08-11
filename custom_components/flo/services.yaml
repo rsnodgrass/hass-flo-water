@@ -1,9 +1,9 @@
-set_preset_mode:
-  description: Set preset mode for the water control device.
+set_mode:
+  description: Set monitoring mode for a given location
   fields:
     entity_id:
-      description: The valve entity id to call service on.
-      example: 'switch.water_valve'
+      description: The location monitoring mode entity id to call service on.
+      example: 'switch.house_water_mode'
     preset_mode:
       description: Preset mode to switch to (home, away, sleep)
       example: 'away'
