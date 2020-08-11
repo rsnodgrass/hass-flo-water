@@ -50,8 +50,23 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo sensors")
         return False
 
-    # iterate all devices and create a valve switch for each device
     sensors = []
+
+    # create location-based sensors
+    device_details = location['devices'][0]
+    now = dt_util.utcnow()
+
+    # FIXME: set the update period for the daily sensor to no less than 5 minutes!!!
+    sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
+                    now.replace(hour=0, minute=0, second=0, microsecond=0)))
+
+    # FIXME: set the update period for the yearly sensor to no less than hourly!!!
+    sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
+                    now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
+
+    sensors.append( FloMonitoringMode(hass, location_id))
+
+    # create device-based sensors for all devices at this location
     for device_details in location['devices']:
         device_id = device_details['id']
 
@@ -59,16 +74,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
 
-        now = dt_util.utcnow()
-        sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
-                        now.replace(hour=0, minute=0, second=0, microsecond=0)))
-        sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
-                        now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
-
-        sensors.append( FloMonitoringMode(hass, location_id))
-
     add_sensors_callback(sensors)
-
 
 
 class FloRateSensor(FloDeviceEntity):
@@ -156,12 +162,13 @@ class FloPressureSensor(FloDeviceEntity):
         return f"flo_pressure_{self._device_id}"
 
 
+# FIXME: This could use reworking and optimization, especially with multiple periods intervals now
 class FloConsumptionSensor(FloDeviceEntity):
     """Water consumption sensor for a Flo device"""
 
     def __init__(self, hass, period_name, location_id, device_details, startdate):
         super().__init__(hass, f"Water Consumption ({period_name})", device_details['id'])
-        self._unique_id = f"flo_consumption_{period_name.lower()}_{self._device_id}_"
+        self._unique_id = f"flo_consumption_{period_name.lower()}_{self._device_id}"
 
         self._location_id = location_id
         self._device_details = device_details
@@ -169,6 +176,9 @@ class FloConsumptionSensor(FloDeviceEntity):
 
         self._attrs['start_date'] = startdate
         self._last_end = 0
+
+        self._interval = '1h'
+        # FIXME: throttle based on time interval analyzed (e.g. 60 seconds for hourly, hourly for yearly)
 
         self.initial_update(startdate)
 
@@ -221,7 +231,7 @@ class FloConsumptionSensor(FloDeviceEntity):
         if now.hour != self._last_end.hour:
             end = now.replace(minute=0, second=0, microsecond=0)
             start = end - timedelta(hours=1)
-            prev_hour = self.readConsumption(start, end, '1h')
+            prev_hour = self.readConsumption(start, end, self._interval)
             self._total += prev_hour
 
         # flo counts all previous consumption in the first second of the hour.
@@ -230,7 +240,7 @@ class FloConsumptionSensor(FloDeviceEntity):
             curr = 0
         else:
             start = now - timedelta(hours=1)
-            curr = self.readConsumption(start, now, '1h')
+            curr = self.readConsumption(start, now, self._interval)
 
         self.readConsumption(now - timedelta(days=365), now, '1m')
         state = self._total + curr
@@ -272,3 +282,4 @@ class FloMonitoringMode(FloLocationEntity):
     @property
     def unique_id(self):
         return f"flo_mode_{self._location_id}"
+    

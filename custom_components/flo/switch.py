@@ -2,15 +2,24 @@
 Support for Flo Water Control System inflow control device valve on/off
 """
 import logging
-import pprint
+import asyncio
 import voluptuous as vol
 from datetime import timedelta
 
 from homeassistant.helpers.entity import ToggleEntity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
-from . import FloDeviceEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
+from homeassistant.const import ATTR_ENTITY_ID
+
+from . import (
+    FloDeviceEntity,
+    FLO_DOMAIN,
+    FLO_SERVICE,
+    FLO_CACHE,
+    CONF_LOCATION_ID
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -21,10 +30,11 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
 })
 
+SERVICE_RUN_HEALTH_TEST = 'run_health_test'
+SERVICE_RUN_HEALTH_TEST_SCHEMA = { vol.Required(ATTR_ENTITY_ID): cv.time_period }
+SERVICE_RUN_HEALTH_TEST_SIGNAL = f"{SERVICE_RUN_HEALTH_TEST}_%s"
+
 # pylint: disable=unused-argument
-# NOTE: there is a platform loaded for each LOCATION (not device, which there may be multiple devices)
-
-
 def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     """Setup the Flo Water Control System integration."""
 
@@ -46,10 +56,19 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
     # iterate all devices and create a valve switch for each device
     switches = []
     for device in location['devices']:
-        switches.append(FloWaterValve(hass, device['id']))
+        valve = FloWaterValve(hass, device['id'])
+        switches.append(valve)
 
     add_switches_callback(switches)
+            
+    # register any exposed services
+    # NOTE: would have used async_register_entity_service if this platform setup was async
 
+    def service_run_health_test(call):
+        entity_id = call.data[ATTR_ENTITY_ID]
+        async_dispatcher_send(hass, SIGNAL_TO_LISTEN_FOR.format(entity_id))
+    
+    hass.services.register(FLO_DOMAIN, SERVICE_RUN_HEALTH_TEST, service_run_health_test, SERVICE_RUN_HEALTH_TEST_SCHEMA)
 
 class FloWaterValve(FloDeviceEntity, ToggleEntity):
     """Flo switch to turn on/off water flow."""
@@ -87,6 +106,18 @@ class FloWaterValve(FloDeviceEntity, ToggleEntity):
         # Flo device's valve adjustments are NOT instanenous, so update state to indiciate that it WILL be off (eventually)
         self.update_state(False)
         # FIXME: trigger update coordinator to read latest state from service
+
+    def run_health_test(self):
+        """Run a health test."""
+        self.flo_service.run_health_test(self._device_id)
+
+    async def async_added_to_hass(self):
+        """Run when entity is about to be added to hass."""
+        async_dispatcher_connect(
+            self.hass,
+            SERVICE_RUN_HEALTH_TEST_SIGNAL.format(self.entity_id),
+            self.run_health_test
+        )
 
     def update(self):
         if not self.device_state:

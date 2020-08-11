@@ -1,23 +1,16 @@
 set_preset_mode:
-  description: Set preset mode for Flo water control device.
+  description: Set preset mode for the water control device.
   fields:
     entity_id:
-      description: Name(s) of entities to change.
-      example: 'sensor.flo_water_control'
+      description: The valve entity id to call service on.
+      example: 'switch.water_valve'
     preset_mode:
-      description: New value of preset mode (home, away, sleep)
+      description: Preset mode to switch to (home, away, sleep)
       example: 'away'
 
-turn_on:
-  description: Turn water control device on.
+run_health_test:
+  description: Run the health test on a water control valve.
   fields:
     entity_id:
-      description: Name(s) of entities to change.
-      example: 'water.house'
-
-turn_off:
-  description: Turn water control device off.
-  fields:
-    entity_id:
-      description: Name(s) of entities to change.
-      example: 'water.greenhouse'
+      description: The valve entity id to call service on.
+      example: 'switch.water_valve'
