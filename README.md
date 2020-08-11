@@ -25,6 +25,10 @@ This integration was developed to cover use cases for my home integration, which
     * water pressure (psi)
     * water temperature (&deg;F)
     * water consumption (g) - daily and yearly
+- services:
+    * turn valve on/off
+    * set monitoring mode (home, away, sleep)
+    * run health test
 - multiple Flo devices and locations
 - restricting monitoring to a single location (for users with multiple houses or locations)
 - careful polling of Flo webservice to avoid accidental DDoS
@@ -116,20 +120,18 @@ More complex cards can be created, for example the following shows both the basi
 
 ## Known Issues
 
-* Flo has removed the water temperature reading as of June 2020; this is no longer available (replaced by "area temp")
+* **Flo has removed the water temperature reading as of June 2020; this is no longer available (replaced by "area temp")**
 
 #### Feature Requests
 
 - support metric unit system (liter, C, kPa)
+- merge turn on/off, mode, and current status into a single entity
 - auto-create a pressure sensor for status of water flow (Ok, Warning, Critical)
-- changing the FloSense water leak monitoring mode (home, away, sleep)
 
 Other ideas (no plans to add currently):
 
-- support triggering the system test of a Flo device
 - support leak detection sensitivity settings (all, small, bigger, biggest)
 - support FloSense alerts (leaks detected)
-- total water usage for the day/week (can be done with combination of consumption and utility meter)
 - support Flo's fixtures beta feature breaking down usage by type (e.g. toilets, appliances, faucet, irrigation, etc)
 
 ## Automation Ideas

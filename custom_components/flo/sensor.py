@@ -20,7 +20,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
 from pyflowater.const import FLO_MODES
-from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
+from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
@@ -254,7 +254,7 @@ class FloConsumptionSensor(FloDeviceEntity):
             prev_hour = self.readConsumption(start, end, self._interval)
             self._total += prev_hour
 
-        # flo counts all previous consumption in the first second of the hour.
+        # Flo counts all previous consumption in the first second of the hour.
         # don't double count if we are in the 1st second and just crossed over
         if now.hour != self._last_end.hour and now.second == 0:
             curr = 0

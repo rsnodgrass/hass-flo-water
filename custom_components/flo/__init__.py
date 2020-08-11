@@ -71,6 +71,7 @@ def setup(hass, config):
 
         hass.data[FLO_SERVICE] = flo
         hass.data[FLO_CACHE] = {}
+        hass.data[FLO_DOMAIN] = {}
 
     except (ConnectTimeout, HTTPError) as ex:
         LOG.error(f"Unable to connect to Flo service: {str(ex)}")
@@ -112,7 +113,7 @@ def setup(hass, config):
 class FloDataUpdateCoordinator(DataUpdateCoordinator):
     @staticmethod
     async def initialize(hass):
-        """ Required due to DataUpdateCoordinator constructor must be run in event loop"""
+        """Required since DataUpdateCoordinator constructor must be run in event loop (and platform is non-async)"""
         # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
         coordinator = FloDataUpdateCoordinator(hass)
         hass.data[FLO_DOMAIN]['coordinator'] = coordinator
