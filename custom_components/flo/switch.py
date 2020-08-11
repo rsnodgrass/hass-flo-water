@@ -66,7 +66,7 @@ def setup_platform(hass, config, add_switches_callback, discovery_info=None):
 
     def service_run_health_test(call):
         entity_id = call.data[ATTR_ENTITY_ID]
-        async_dispatcher_send(hass, SIGNAL_TO_LISTEN_FOR.format(entity_id))
+        async_dispatcher_send(hass, SERVICE_RUN_HEALTH_TEST_SIGNAL.format(entity_id))
     
     hass.services.register(FLO_DOMAIN, SERVICE_RUN_HEALTH_TEST, service_run_health_test, SERVICE_RUN_HEALTH_TEST_SCHEMA)
 
