@@ -141,7 +141,7 @@ class FloUpdateCoordinator(FloEntity):
 
         # the value of this sensor is the elapsed time to update
         end = time.time()
-        self._state = end - start
+        self.update_state(end - start)
 
         # FIXME: publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
 
