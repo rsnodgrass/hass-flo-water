@@ -8,6 +8,7 @@ https://github.com/home-assistant/home-assistant/blob/dev/homeassistant/componen
 import logging
 import json
 import requests
+import asyncio
 import time
 import datetime
 import voluptuous as vol
@@ -85,6 +86,10 @@ def setup(hass, config):
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
+    # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
+    hass.data[FLO_DOMAIN]['coordinator'] = FloDataUpdateCoordinator(hass)
+    asyncio.run_coroutine_threadsafe( self.async_refresh() )
+
     # create sensors/switches for all configured locations
     for location_id in locations:
         discovery_info = { CONF_LOCATION_ID: location_id }
@@ -95,6 +100,43 @@ def setup(hass, config):
                 hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True
+
+
+
+class FloDataUpdateCoordinator(DataUpdateCoordinator):
+    def __init__(self, hass):
+        super().__init__(
+            hass, LOG, name=FLO_DOMAIN, update_interval=SCAN_INTERVAL,
+        )
+
+        self._hass = hass
+        self._hass.data[FLO_CACHE] = {}
+
+    # FIXME: move to async client
+    async def _async_update_data(self):
+        LOG.debug(f"Coordinator calling Flo webservice for latest state")
+        flo = self._hass.data[FLO_SERVICE]
+
+        # clear the pyflowater internal cache to force a fresh webservice call
+        flo.clear_cache()
+
+        cache = self._hass.data[FLO_CACHE]
+        for location in flo.locations():
+            cache[location['id']] = location
+
+            # query Flo webservice for each of the devices
+            devices = location.get('devices')
+            for device in devices:
+                device_id = device['id']
+                cache[device_id] = flo.device(device_id)
+
+            # publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
+            for entity in self._hass.data[FLO_ENTITIES]:
+                 if entity != self:
+                    entity._trigger_update_callback()
+
+        return True
+
 
 
 class FloEntity(Entity):
@@ -127,7 +169,7 @@ class FloEntity(Entity):
         return False
 
     def _trigger_update_callback(self):
-        self.schedule_update_ha_state()
+        self.schedule_update_ha_state(force_refresh=True)
 
     @property
     def device_state_attributes(self):

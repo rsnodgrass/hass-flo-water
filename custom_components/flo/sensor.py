@@ -18,8 +18,10 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
 from pyflowater.const import FLO_MODES
-from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
+from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
@@ -49,19 +51,13 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     else:  # manual config
         location_id = config[CONF_LOCATION_ID]
 
-
     location = flo.location(location_id)
     if not location:
         LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo sensors")
         return False
 
-    now = dt_util.utcnow()
-
-
-    # add the special sensor that coordinates and monitors all updated from the Flo webservice
-    sensors = [ FloUpdateCoordinator.getSingletonInstance(hass, config) ]
-
     # iterate all devices and create a valve switch for each device
+    sensors = []
     for device_details in location['devices']:
         device_id = device_details['id']
 
@@ -69,6 +65,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
 
+        now = dt_util.utcnow()
         sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
                         now.replace(hour=0, minute=0, second=0, microsecond=0)))
         sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
@@ -78,79 +75,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     add_sensors_callback(sensors)
 
-
-class FloUpdateCoordinator(FloEntity):
-    __instance = None
-
-    """
-    Ensure there is only a single Flo update coordinator, as it will update all locations and
-    devices without duplicating service calls.
-    """
-    @staticmethod 
-    def getSingletonInstance(hass, config):
-        """ Static access method. """
-        if FloUpdateCoordinator.__instance == None:
-            FloUpdateCoordinator(hass, config)
-        return FloUpdateCoordinator.__instance
-
-    """
-    Periodically calls Flo service to get current state for devices and locations to cache
-    the data for other sensors to access (to avoid all the sensors overwhelming the Flo
-    service with independent calls).
-    """
-    def __init__(self, hass, config):
-        super().__init__(hass, 'Flo Update Coordinator')
-
-        if not self._hass.data[FLO_CACHE]:
-            self._hass.data[FLO_CACHE] = {}
-
-        # force an initial update of all data from the Flo webservice
-        LOG.info("Initializing Flo webservice update coordinator")
-
-    @property
-    def should_poll(self):
-        """Ensure polling is ALWAYS ON for the coordinator of all Flo updates!"""
-        return True
-
-    @property
-    def unit_of_measurement(self):
-        return "seconds"
-
-    @property
-    def icon(self):
-        return 'mdi:sync'
-
-    def update(self):
-        LOG.debug(f"Coordinator calling Flo webservice for latest state")
-        start = time.time()
-
-        flo = self._hass.data[FLO_SERVICE]
-
-        # clear the pyflowater internal cache to force a fresh webservice call
-        flo.clear_cache()
-
-        cache = self._hass.data[FLO_CACHE]
-        for location in flo.locations():
-            cache[location['id']] = location
-
-            # query Flo webservice for each of the devices
-            devices = location.get('devices')
-            for device in devices:
-                device_id = device['id']
-                cache[device_id] = flo.device(device_id)
-
-        # the value of this sensor is the elapsed time to update
-        end = time.time()
-        self.update_state(end - start)
-
-        # publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
-        for entity in self._hass.data[FLO_ENTITIES]:
-            if entity != self:
-                entity._trigger_update_callback()
-
-    @property
-    def unique_id(self):
-        return f"flo_update_coordinator" # there is only one...
 
 
 class FloRateSensor(FloDeviceEntity):
