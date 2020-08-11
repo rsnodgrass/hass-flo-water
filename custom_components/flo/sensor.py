@@ -19,7 +19,7 @@ from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
 from pyflowater.const import FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
-from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID, CONF_STARTDATE
+from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
