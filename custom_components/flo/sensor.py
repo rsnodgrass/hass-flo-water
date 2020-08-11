@@ -304,7 +304,7 @@ class FloMonitoringMode(FloLocationEntity):
         async_dispatcher_connect(
             self.hass,
             SERVICE_SET_MODE_SIGNAL.format(self.entity_id),
-            self.SET_mode
+            self.set_mode
         )
 
     @property
