@@ -40,7 +40,7 @@ class FloPhysicalValveSensor(FloDeviceEntity, BinarySensorEntity):
     """Current physical Flo valve position (may not yet match the Flo valve switch setting)"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass, 'Flo Water Valve Position', device_id)
+        super().__init__(hass, 'Water Valve Position', device_id)
         self.update()
 
     @property

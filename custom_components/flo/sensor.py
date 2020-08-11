@@ -64,18 +64,16 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     for device_details in location['devices']:
         device_id = device_details['id']
 
-        # daily consumption
+        sensors.append( FloRateSensor(hass, device_id))
+        sensors.append( FloPressureSensor(hass, device_id))
+        sensors.append( FloTempSensor(hass, device_id))
+
         sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
                         now.replace(hour=0, minute=0, second=0, microsecond=0)))
-
         sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
                         now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
 
         sensors.append( FloMonitoringMode(hass, location_id))
-
-        sensors.append( FloRateSensor(hass, device_id))
-        sensors.append( FloTempSensor(hass, device_id))
-        sensors.append( FloPressureSensor(hass, device_id))
 
     add_sensors_callback(sensors)
 
@@ -145,7 +143,7 @@ class FloUpdateCoordinator(FloEntity):
         end = time.time()
         self._state = end - start
 
-        # FIXME: publish notification to all sensors/etc that do cache lookups to avoid polling
+        # FIXME: publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
 
     @property
     def unique_id(self):
@@ -352,4 +350,4 @@ class FloMonitoringMode(FloLocationEntity):
 
     @property
     def unique_id(self):
-        return f"flo_location_{self._location_id}"
+        return f"flo_mode_{self._location_id}"

@@ -55,7 +55,7 @@ class FloWaterValve(FloDeviceEntity, ToggleEntity):
     """Flo switch to turn on/off water flow."""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass, 'Flo Water Valve', device_id)
+        super().__init__(hass, 'Water Valve', device_id)
 
         state = self.device_state
         if state:
