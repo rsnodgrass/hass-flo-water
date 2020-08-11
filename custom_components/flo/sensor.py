@@ -179,6 +179,11 @@ class FloConsumptionSensor(FloDeviceEntity):
         self.initial_update(startdate)
 
     @property
+    def should_poll(self):
+        # FIXME: how should this update, should there be a coordinator
+        return True
+
+    @property
     def device_state_attributes(self):
         """Return the device state attributes."""
         return self._attrs

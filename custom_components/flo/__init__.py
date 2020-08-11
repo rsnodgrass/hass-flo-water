@@ -87,8 +87,9 @@ def setup(hass, config):
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
     # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
-    hass.data[FLO_DOMAIN]['coordinator'] = FloDataUpdateCoordinator(hass)
-    asyncio.run_coroutine_threadsafe( self.async_refresh() )
+    coordinator = FloDataUpdateCoordinator(hass)
+    hass.data[FLO_DOMAIN]['coordinator'] = coordinator
+    asyncio.run_coroutine_threadsafe( coordinator.async_refresh(), hass.loop )
 
     # create sensors/switches for all configured locations
     for location_id in locations:
@@ -112,8 +113,10 @@ class FloDataUpdateCoordinator(DataUpdateCoordinator):
         self._hass = hass
         self._hass.data[FLO_CACHE] = {}
 
-    # FIXME: move to async client
     async def _async_update_data(self):
+        await self._hass.async_add_executor_job(self._update_data)
+
+    def _update_data(self):
         LOG.debug(f"Coordinator calling Flo webservice for latest state")
         flo = self._hass.data[FLO_SERVICE]
 
