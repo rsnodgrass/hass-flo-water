@@ -13,11 +13,14 @@ import time
 import datetime
 import voluptuous as vol
 from requests.exceptions import HTTPError, ConnectTimeout
+from datetime import datetime, timedelta
 
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
 import homeassistant.helpers.config_validation as cv
+
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from pyflowater import PyFlo
 
@@ -35,14 +38,18 @@ CONF_LOCATION_ID = 'location_id'
 
 ATTRIBUTION = 'Data provided by Flo'
 
+# try to avoid DDoS Flo's cloud service
+DEFAULT_SCAN_INTERVAL=15
+SCAN_INTERVAL = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
-        vol.Optional(CONF_LOCATIONS, default=[]): cv.ensure_list
+        vol.Optional(CONF_LOCATIONS, default=[]): cv.ensure_list,
+        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
     })
 }, extra=vol.ALLOW_EXTRA)
-
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
@@ -87,9 +94,9 @@ def setup(hass, config):
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
     # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
-    coordinator = FloDataUpdateCoordinator(hass)
-    hass.data[FLO_DOMAIN]['coordinator'] = coordinator
-    asyncio.run_coroutine_threadsafe( coordinator.async_refresh(), hass.loop )
+    future = asyncio.run_coroutine_threadsafe( FloDataUpdateCoordinator.initialize(hass), hass.loop )
+    if future.result:
+        LOG.debug("Initialization of Flo coordinator complete")
 
     # create sensors/switches for all configured locations
     for location_id in locations:
@@ -103,18 +110,26 @@ def setup(hass, config):
     return True
 
 
-
 class FloDataUpdateCoordinator(DataUpdateCoordinator):
+    @staticmethod
+    async def initialize(hass):
+        """ Required due to DataUpdateCoordinator constructor must be run in event loop"""
+        # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
+        coordinator = FloDataUpdateCoordinator(hass)
+        hass.data[FLO_DOMAIN]['coordinator'] = coordinator
+        await coordinator.async_refresh()
+        return coordinator
+
     def __init__(self, hass):
         super().__init__(
-            hass, LOG, name=FLO_DOMAIN, update_interval=SCAN_INTERVAL,
+            hass, LOG, name=FLO_DOMAIN, update_interval=SCAN_INTERVAL
         )
 
         self._hass = hass
         self._hass.data[FLO_CACHE] = {}
 
     async def _async_update_data(self):
-        await self._hass.async_add_executor_job(self._update_data)
+        return await self._hass.async_add_executor_job(self._update_data)
 
     def _update_data(self):
         LOG.debug(f"Coordinator calling Flo webservice for latest state")

@@ -18,24 +18,18 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-
 from pyflowater.const import FLO_MODES
 from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_SCAN_INTERVAL=15
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_LOCATION_ID): cv.string,
-    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
+    vol.Required(CONF_LOCATION_ID): cv.string
 })
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
-# try to avoid DDoS Flo's cloud service
-SCAN_INTERVAL = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
 
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
