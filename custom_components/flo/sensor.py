@@ -12,26 +12,28 @@ import time
 import logging
 import voluptuous as vol
 
-from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE
+from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE, CONF_SCAN_INTERVAL
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 
-from pyflowater.const import FLO_MODES, FLO_AWAY, FLO_HOME, FLO_SLEEP
-from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
+from pyflowater.const import FLO_MODES
+from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_SERVICE, FLO_CACHE, FLO_ENTITIES, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
+DEFAULT_SCAN_INTERVAL=15
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Required(CONF_LOCATION_ID): cv.string
+    vol.Required(CONF_LOCATION_ID): cv.string,
+    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
 })
 
 TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
 # try to avoid DDoS Flo's cloud service
-MIN_SCAN_INTERVAL = 15 # seconds
-SCAN_INTERVAL = timedelta(seconds=MIN_SCAN_INTERVAL)
+SCAN_INTERVAL = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
 
 # pylint: disable=unused-argument
 def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
@@ -143,7 +145,10 @@ class FloUpdateCoordinator(FloEntity):
         end = time.time()
         self.update_state(end - start)
 
-        # FIXME: publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
+        # publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
+        for entity in self._hass.data[FLO_ENTITIES].append:
+            if entity != self:
+                entity._trigger_update_callback()
 
     @property
     def unique_id(self):

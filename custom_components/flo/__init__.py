@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 FLO_DOMAIN = 'flo'
 FLO_SERVICE = 'flo_service'
 FLO_CACHE = 'flo_cache'
+FLO_ENTITIES = 'flo_entities'
 
 NOTIFICATION_ID = 'flo_notification'
 
@@ -60,6 +61,7 @@ def setup(hass, config):
 
         hass.data[FLO_SERVICE] = flo
         hass.data[FLO_CACHE] = {}
+        hass.data[FLO_ENTITIES] = []
 
     except (ConnectTimeout, HTTPError) as ex:
         LOG.error(f"Unable to connect to Flo service: {str(ex)}")
@@ -107,6 +109,9 @@ class FloEntity(Entity):
             ATTR_ATTRIBUTION: ATTRIBUTION
         }
 
+        # register entities to be notified via _trigger_update_callback() when Flo state is updated
+        hass.data[FLO_ENTITIES].append(self)
+
     @property
     def flo_service(self):
         return self._hass.data[FLO_SERVICE]
@@ -118,8 +123,11 @@ class FloEntity(Entity):
 
     @property
     def should_poll(self):
-        """A coordinate manually updates all the sensors, so ensure polling ON for HA to detect state changes!"""
-        return True
+        """Flo update coordinator notifies via _trigger_update_callback whenever data has been updated"""
+        return False
+
+    def _trigger_update_callback(self):
+        self.schedule_update_ha_state()
 
     @property
     def device_state_attributes(self):
