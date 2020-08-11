@@ -66,12 +66,13 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     now = dt_util.utcnow()
 
     # FIXME: set the update period for the daily sensor to no less than 5 minutes!!!
+    # FIXME: verify this is not abusing Flo's service
     sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
                     now.replace(hour=0, minute=0, second=0, microsecond=0)))
 
     # FIXME: set the update period for the yearly sensor to no less than hourly!!!
-    sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
-                    now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
+    #sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
+    #                now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
 
     # create device-based sensors for all devices at this location
     for device_details in location['devices']:
@@ -187,7 +188,7 @@ class FloConsumptionSensor(FloDeviceEntity):
     """Water consumption sensor for a Flo device"""
 
     def __init__(self, hass, period_name, location_id, device_details, startdate):
-        super().__init__(hass, f"Water Consumption ({period_name})", device_details['id'])
+        super().__init__(hass, f"{period_name} Water Consumption", device_details['id'])
         self._unique_id = f"flo_consumption_{period_name.lower()}_{self._device_id}"
 
         self._location_id = location_id
@@ -254,7 +255,7 @@ class FloConsumptionSensor(FloDeviceEntity):
             prev_hour = self.readConsumption(start, end, self._interval)
             self._total += prev_hour
 
-        # Flo counts all previous consumption in the first second of the hour.
+        # flo counts all previous consumption in the first second of the hour.
         # don't double count if we are in the 1st second and just crossed over
         if now.hour != self._last_end.hour and now.second == 0:
             curr = 0
