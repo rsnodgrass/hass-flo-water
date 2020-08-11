@@ -2,7 +2,7 @@
   "domain": "flo",
   "name": "Flo Water Monitoring & Control",
   "documentation": "https://github.com/rsnodgrass/hass-flo-water/",
-  "requirements": ["pyflowater>=0.2.1"],
+  "requirements": ["pyflowater>=0.2.3"],
   "dependencies": [],
   "codeowners": ["@rsnodgrass"]
 }

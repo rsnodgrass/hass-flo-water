@@ -40,12 +40,12 @@ class FloPhysicalValveSensor(FloDeviceEntity, BinarySensorEntity):
     """Current physical Flo valve position (may not yet match the Flo valve switch setting)"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass, 'Water Valve Position', device_id)
+        super().__init__(hass, 'Water Valve Open', device_id)
         self.update()
 
     @property
     def is_on(self):
-        """Return true if the Flo valve is open."""
+        """Return true if the Flo valve is physically open."""
         return self.state == True
 
     @property
