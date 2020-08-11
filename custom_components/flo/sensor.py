@@ -171,7 +171,7 @@ class FloRateSensor(FloDeviceEntity):
     def update(self):
         """Update sensor state"""
         state = self.get_telemetry('gpm')
-        self.update_state( round(state, 2) )
+        self.update_state( round(state, 1) )
 
     @property
     def unique_id(self):
@@ -229,7 +229,7 @@ class FloPressureSensor(FloDeviceEntity):
         """Update sensor state"""
         state = self.get_telemetry('psi')
         if state:
-            self.update_state( round(state, 2) )
+            self.update_state( round(state, 1) )
 
     @property
     def unique_id(self):
@@ -317,8 +317,8 @@ class FloConsumptionSensor(FloDeviceEntity):
     def unique_id(self):
         return self._unique_id
 
-# FIXME: IDEALLY, Home Assistant would add a new platform for valves (or water systems) and this should be that
-# instead of a sensor that provides additional APIs.
+# FIXME: IDEALLY, Home Assistant would add a new platform for valves (e.g. water_valve, like a water_heater) and this
+# should be refactored as an attribute of that.
 #
 # https://support.meetflo.com/hc/en-us/articles/115003927993-What-s-the-difference-between-Home-Away-and-Sleep-modes-
 class FloMonitoringMode(FloLocationEntity):
