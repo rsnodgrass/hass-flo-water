@@ -277,7 +277,7 @@ class FloConsumptionSensor(FloDeviceEntity):
         if not res:
             LOG.error(f"Bad Flo consumption response: {start}:{end}:{interval}: %s", res)
             return 0
-        return round(res['aggregations']['sumTotalGallonsConsumed'], 2)
+        return round(res['aggregations']['sumTotalGallonsConsumed'], 1)
 
     def initial_update(self, startdate):
         """ Initial update sensor state"""
