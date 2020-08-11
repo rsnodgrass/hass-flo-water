@@ -339,13 +339,7 @@ class FloMonitoringMode(FloLocationEntity):
             LOG.info(f"Invalid mode '{mode}' for FloSense monitoring, IGNORING! (valid={FLO_MODES})")
             return
 
-        if mode == FLO_HOME:
-            self.flo_service.set_mode_home(self._location_id)
-        elif mode == FLO_AWAY:
-            self.flo_service.set_mode_away(self._location_id)
-        elif mode == FLO_SLEEP:
-            self.flo_service.set_mode_sleep(self._location_id)
-
+        self.flo_service.set_mode(self._location_id, mode)
         self.update_state(mode)
 
     @property
