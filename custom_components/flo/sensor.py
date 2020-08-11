@@ -52,8 +52,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
 
     location = flo.location(location_id)
     if not location:
-        LOG.warning(
-            f"Flo location {location_id} not found, ignoring creation of Flo sensors")
+        LOG.warning(f"Flo location {location_id} not found, ignoring creation of Flo sensors")
         return False
 
     now = dt_util.utcnow()
@@ -107,7 +106,6 @@ class FloUpdateCoordinator(FloEntity):
 
         # force an initial update of all data from the Flo webservice
         LOG.info("Initializing Flo webservice update coordinator")
-        self.update()
 
     @property
     def should_poll(self):
@@ -123,7 +121,7 @@ class FloUpdateCoordinator(FloEntity):
         return 'mdi:sync'
 
     def update(self):
-        LOG.debug(f"Coordinator calling Flo service for latest status updates")
+        LOG.debug(f"Coordinator calling Flo webservice for latest state")
         start = time.time()
 
         flo = self._hass.data[FLO_SERVICE]
@@ -146,7 +144,7 @@ class FloUpdateCoordinator(FloEntity):
         self.update_state(end - start)
 
         # publish notification to all sensors/etc that read cache to reduce latency of them discovering changes
-        for entity in self._hass.data[FLO_ENTITIES].append:
+        for entity in self._hass.data[FLO_ENTITIES]:
             if entity != self:
                 entity._trigger_update_callback()
 
@@ -174,7 +172,8 @@ class FloRateSensor(FloDeviceEntity):
     def update(self):
         """Update sensor state"""
         state = self.get_telemetry('gpm')
-        self.update_state( round(state, 1) )
+        if state != None:
+            self.update_state( round(state, 1) )
 
     @property
     def unique_id(self):

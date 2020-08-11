@@ -29,11 +29,6 @@ This integration was developed to cover use cases for my home integration, which
 - restricting monitoring to a single location (for users with multiple houses or locations)
 - careful polling of Flo webservice to avoid accidental DDoS
 
-#### NOT YET SUPPORTED
-
-- changing the FloSense water leak monitoring mode (home, away, sleep)
-- sensors that automatically track water use for current day / month / year
-
 ## Installation
 
 #### Versions
@@ -127,6 +122,7 @@ More complex cards can be created, for example the following shows both the basi
 
 - support metric unit system (liter, C, kPa)
 - auto-create a pressure sensor for status of water flow (Ok, Warning, Critical)
+- changing the FloSense water leak monitoring mode (home, away, sleep)
 
 Other ideas (no plans to add currently):
 
