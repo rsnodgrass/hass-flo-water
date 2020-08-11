@@ -59,6 +59,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         return False
 
     sensors = []
+    mode_sensors = {}
 
     # create location-based sensors
     device_details = location['devices'][0]
@@ -72,8 +73,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
                     now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
 
-    sensors.append( FloMonitoringMode(hass, location_id))
-
     # create device-based sensors for all devices at this location
     for device_details in location['devices']:
         device_id = device_details['id']
@@ -82,13 +81,20 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
 
+    # add sensor that tracks the current monitoring mode for a location
+    mode_sensor = FloMonitoringMode(hass, location_id)
+    sensors.append( mode_sensor )
+    mode_sensors[mode_sensor.entity_id] = mode_sensor
+
     add_sensors_callback(sensors)
 
     # register any exposed services
     def service_set_mode(call):
-        entity_id = call.data[ATTR_ENTITY_ID]
+        entity = mode_sensors[ call.data[ATTR_ENTITY_ID] ]
         mode = call.data[ATTR_MODE]
-        async_dispatcher_send(hass, SERVICE_SET_MODE_SIGNAL.format(entity_id))
+        if entity:
+            entity.set_mode(mode)
+
     hass.services.register(FLO_DOMAIN, SERVICE_SET_MODE, service_set_mode, SERVICE_SET_MODE)
 
 class FloRateSensor(FloDeviceEntity):
@@ -285,9 +291,9 @@ class FloMonitoringMode(FloLocationEntity):
         mode = self.location_state.get('systemMode')
         return self.update_state(mode.get('target'))
 
-    def SET_mode(self, mode):
+    def set_mode(self, mode):
         if not mode in FLO_MODES:
-            LOG.info(f"Invalid mode '{mode}' for FloSense monitoring, IGNORING! (valid={FLO_MODES})")
+            LOG.info(f"Invalid Flo location monitoring mode '{mode}', IGNORING! (valid={FLO_MODES})")
             return
 
         self.flo_service.set_mode(self._location_id, mode)
