@@ -1,0 +1,23 @@
+set_preset_mode:
+  description: Set preset mode for Flo water control device.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: 'sensor.flo_water_control'
+    preset_mode:
+      description: New value of preset mode (home, away, sleep)
+      example: 'away'
+
+turn_on:
+  description: Turn water control device on.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: 'water.house'
+
+turn_off:
+  description: Turn water control device off.
+  fields:
+    entity_id:
+      description: Name(s) of entities to change.
+      example: 'water.greenhouse'
