@@ -29,9 +29,9 @@ This integration was developed to cover use cases for my home integration, which
     * turn valve on/off
     * set monitoring mode (home, away, sleep)
     * run health test
-- multiple Flo devices and locations
-- restricting monitoring to a single location (for users with multiple houses or locations)
-- careful polling of Flo webservice to avoid accidental DDoS
+- multiple Flo devices at single location
+- multiple locations with Flo devices and ability to restrict locations (for users with multiple houses or locations)
+- reduced polling of Flo webservice to avoid unintentional DDoS
 
 ## Installation
 
