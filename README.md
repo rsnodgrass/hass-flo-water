@@ -86,21 +86,21 @@ Alternative Lovelace example with gauges that turn colors when pressure or flow 
 ```yaml
 cards:
   - type: gauge
-    name: Water Pressure
-    entity: sensor.water_pressure
-    max: 100
-    severity:
-      green: 0
-      yellow: 70
-      red: 80
-  - type: gauge
-    name: Flow Rate
+    name: Flow
     entity: sensor.water_flow_rate
     max: 15
     severity:
       green: 0
       yellow: 10
       red: 12
+  - type: gauge
+    name: Pressure
+    entity: sensor.water_pressure
+    max: 100
+    severity:
+      green: 0
+      yellow: 70
+      red: 80
   - type: gauge
     name: Temp
     entity: sensor.water_temperature
