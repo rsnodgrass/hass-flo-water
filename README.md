@@ -88,7 +88,6 @@ cards:
   - type: gauge
     name: Flow
     entity: sensor.water_flow_rate
-    max: 15
     severity:
       green: 0
       yellow: 10
@@ -96,15 +95,13 @@ cards:
   - type: gauge
     name: Pressure
     entity: sensor.water_pressure
-    max: 100
     severity:
       green: 0
       yellow: 70
-      red: 80
+      red: 90
   - type: gauge
     name: Temp
     entity: sensor.water_temperature
-    max: 75
 type: horizontal-stack
 ```
 
