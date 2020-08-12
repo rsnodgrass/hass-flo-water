@@ -15,6 +15,7 @@ import voluptuous as vol
 from requests.exceptions import HTTPError, ConnectTimeout
 from datetime import datetime, timedelta
 
+from homeassistant.core import callback
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
@@ -165,9 +166,6 @@ class FloEntity(Entity):
         """Flo update coordinator notifies an update needs to occur via signal notifications (SIGNAL_FLO_DATA_UPDATE)"""
         return False
 
-    async def async_update(self):
-        await self._hass.data[FLO_DOMAIN][ATTR_COORDINATOR].async_request_refresh()
-
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
@@ -195,6 +193,10 @@ class FloEntity(Entity):
         if self._attrs:
             now = datetime.now()
             self._attrs['last_updated'] = now.strftime("%m/%d/%Y %H:%M:%S")
+
+    @callback
+    def _update_callback(self):
+        self.schedule_update_ha_state(force_refresh=True)
 
 
 class FloDeviceEntity(FloEntity):
@@ -228,7 +230,7 @@ class FloDeviceEntity(FloEntity):
     async def async_added_to_hass(self):
         """Run when entity is about to be added to hass."""
         # register this entity to listen to updates for this device
-        async_dispatcher_connect( self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._device_id), self.update )
+        async_dispatcher_connect( self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._device_id), self._update_callback)
 
 
 class FloLocationEntity(FloEntity):
@@ -249,4 +251,4 @@ class FloLocationEntity(FloEntity):
     async def async_added_to_hass(self):
         """Run when entity is about to be added to hass."""
         # register this entity to listen to updates for this location
-        async_dispatcher_connect( self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._location_id), self.update )
+        async_dispatcher_connect(self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._location_id), self._update_callback)

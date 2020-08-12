@@ -5,7 +5,7 @@
       "user": {
         "title": "Connect to Flo by Moen",
         "data": {
-          "email": "[%key:common::config_flow::data::username%]",
+          "email": "[%key:common::config_flow::data::email%]",
           "password": "[%key:common::config_flow::data::password%]"
         }
       }
