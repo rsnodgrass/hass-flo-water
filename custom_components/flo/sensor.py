@@ -283,10 +283,10 @@ class FloMonitoringMode(FloLocationEntity):
 
 # pylint: disable=too-many-instance-attributes
 class FloPhysicalValveSensor(FloDeviceEntity):
-    """Current physical Flo valve position (may not yet match the Flo valve switch setting)"""
+    """Current physical Flo valve position (may not match the Flo valve switch setting yet)"""
 
     def __init__(self, hass, device_id):
-        super().__init__(hass, 'Water Valve', device_id)
+        super().__init__(hass, 'Flo Physical Valve', device_id)
         self.update()
 
     @property
@@ -306,4 +306,4 @@ class FloPhysicalValveSensor(FloDeviceEntity):
 
     @property
     def unique_id(self):
-        return f"flo_valve_{self._device_id}"
+        return f"flo_physical_valve_{self._device_id}"
