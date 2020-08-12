@@ -182,9 +182,7 @@ class FloEntity(Entity):
                 unit = self.unit_of_measurement
             LOG.info(f"Updated {self.name} to {self.state} {unit}")
 
-    # FIXME: we should be able to get rid of the signals for this...!!
     async def async_added_to_hass(self):
-        """When entity is added to hass."""
         self.async_on_remove(
             self._hass.data[FLO_DOMAIN][ATTR_COORDINATOR].async_add_listener(
                 self.async_write_ha_state
