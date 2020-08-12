@@ -39,7 +39,7 @@ CONF_LOCATIONS = 'locations'
 CONF_LOCATION_ID = 'location_id'
 
 # try to avoid DDoS Flo's cloud service
-SCAN_INTERVAL = timedelta(seconds=15)
+SCAN_INTERVAL = timedelta(seconds=30)
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
@@ -232,5 +232,5 @@ class FloLocationEntity(FloEntity):
 
     @property
     def location_state(self):
-        """Get device data shared from the Flo update coordinator"""
+        """Get location data shared from the Flo update coordinator"""
         return self._hass.data[FLO_DOMAIN][ATTR_CACHE].get(self._location_id)
