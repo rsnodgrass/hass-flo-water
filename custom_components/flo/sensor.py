@@ -20,6 +20,7 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
 from pyflowater.const import FLO_MODES
+
 from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
@@ -27,8 +28,6 @@ LOG = logging.getLogger(__name__)
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
 })
-
-TIME_FMT = '%Y-%m-%dT%H:%M:%S.000Z'
 
 ATTR_MODE = 'mode'
 
@@ -61,19 +60,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
     sensors = []
     mode_sensors = {}
 
-    # create location-based sensors
-    device_details = location['devices'][0]
-    now = dt_util.utcnow()
-
-    # FIXME: set the update period for the daily sensor to no less than 5 minutes!!!
-    # FIXME: verify this is not abusing Flo's service
-    sensors.append( FloConsumptionSensor(hass, "Daily", location_id, device_details,
-                    now.replace(hour=0, minute=0, second=0, microsecond=0)))
-
-    # FIXME: set the update period for the yearly sensor to no less than hourly!!!
-    #sensors.append( FloConsumptionSensor(hass, "Yearly", location_id, device_details,
-    #                now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)))
-
     # create device-based sensors for all devices at this location
     for device_details in location['devices']:
         device_id = device_details['id']
@@ -81,7 +67,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloRateSensor(hass, device_id))
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
+        sensors.append( FloDailyConsumptionSensor(hass, device_id))
 
+    # create location-based sensors
     # add sensor that tracks the current monitoring mode for a location
     mode_sensor = FloMonitoringMode(hass, location_id)
     sensors.append( mode_sensor )
@@ -183,35 +171,20 @@ class FloPressureSensor(FloDeviceEntity):
         return f"flo_pressure_{self._device_id}"
 
 
-# FIXME: This could use reworking and optimization, especially with multiple periods intervals now
-class FloConsumptionSensor(FloDeviceEntity):
+class FloDailyConsumptionSensor(FloDeviceEntity):
     """Water consumption sensor for a Flo device"""
 
-    def __init__(self, hass, period_name, location_id, device_details, startdate):
-        super().__init__(hass, f"{period_name} Water Consumption", device_details['id'])
-        self._unique_id = f"flo_consumption_{period_name.lower()}_{self._device_id}"
-
-        self._location_id = location_id
-        self._device_details = device_details
-        #self._attrs.update(device_details)
-
-        self._attrs['start_date'] = startdate
-        self._last_end = 0
-
-        self._interval = '1h'
-        # FIXME: throttle based on time interval analyzed (e.g. 60 seconds for hourly, hourly for yearly)
-
-        self.initial_update(startdate)
+    def __init__(self, hass, device_id):
+        super().__init__(hass, f"Daily Water Consumption", device_id)
+        self._unique_id = f"flo_consumption_daily_{device_id}"
 
     @property
     def should_poll(self):
-        # FIXME: how should this update, should there be a coordinator
+        # FIXME: need to set appropriate scan_intervals:
+        #  - "instananeous" = last minute consumption (every 60 seconds)
+        #  - daily (every 10 minutes)
+        #  - yearly (every hour)
         return True
-
-    @property
-    def device_state_attributes(self):
-        """Return the device state attributes."""
-        return self._attrs
 
     @property
     def unit_of_measurement(self):
@@ -219,59 +192,23 @@ class FloConsumptionSensor(FloDeviceEntity):
         return "gallons"
 
     @property
-    def state(self):
-        return round(self._state, 2)
-
-    @property
     def icon(self):
         return "mdi:gauge"
 
-    def readConsumption(self, start, end, interval):
-        res = self.flo_service.consumption(self._location_id,
-                                           self._device_details['macAddress'],
-                                           start.strftime(TIME_FMT),
-                                           end.strftime(TIME_FMT),
-                                           interval)
-        if not res:
-            LOG.error(f"Bad Flo consumption response: {start}:{end}:{interval}: %s", res)
-            return 0
-        return round(res['aggregations']['sumTotalGallonsConsumed'], 1)
-
-    def initial_update(self, startdate):
-        """ Initial update sensor state"""
-        end = dt_util.utcnow()
-        self.update_state(self.readConsumption(startdate, end, '1m'))
-        self._total = self._state
-        self._last_end = end
-
     def update(self):
-        """Update sensor state"""
-        now = dt_util.utcnow()
-
-        # if we crossed over an hour boundary, add the last hour to the total
-        if now.hour != self._last_end.hour:
-            end = now.replace(minute=0, second=0, microsecond=0)
-            start = end - timedelta(hours=1)
-            prev_hour = self.readConsumption(start, end, self._interval)
-            self._total += prev_hour
-
-        # flo counts all previous consumption in the first second of the hour.
-        # don't double count if we are in the 1st second and just crossed over
-        if now.hour != self._last_end.hour and now.second == 0:
-            curr = 0
-        else:
-            start = now - timedelta(hours=1)
-            curr = self.readConsumption(start, now, self._interval)
-
-        self.readConsumption(now - timedelta(days=365), now, '1m')
-        state = self._total + curr
-        self._last_end = now
-
-        self.update_state(state)
+        # default consumption from pyflowater is daily rollup
+        res = self.flo_service.consumption(self._device_id)
+        if not res:
+            LOG.error(f"Daily Flo consumption request failed!: %s", res)
+            return
+        
+        self.update_state( round(res['aggregations']['sumTotalGallonsConsumed'], 1) )
 
     @property
     def unique_id(self):
         return self._unique_id
+
+
 
 # FIXME: IDEALLY, Home Assistant would add a new platform for valves (e.g. water_valve, like a water_heater) and this
 # should be refactored as an attribute of that.

@@ -93,14 +93,14 @@ class FloWaterValve(FloDeviceEntity, ToggleEntity):
         return self.state == True
 
     def turn_on(self):
-        self.flo_service.turn_valve_on(self._device_id)
+        self.flo_service.open_valve(self._device_id)
 
          # Flo device's valve adjustments are NOT instanenous, so update state to indiciate that it WILL be on (eventually)
         self.update_state(True)
         # FIXME: trigger update coordinator to read latest state from service
 
     def turn_off(self):
-        self.flo_service.turn_valve_off(self._device_id)
+        self.flo_service.close_valve(self._device_id)
 
         # Flo device's valve adjustments are NOT instanenous, so update state to indiciate that it WILL be off (eventually)
         self.update_state(False)
