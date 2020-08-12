@@ -12,6 +12,7 @@ import asyncio
 import time
 import datetime
 import voluptuous as vol
+
 from requests.exceptions import HTTPError, ConnectTimeout
 from datetime import datetime, timedelta
 
@@ -23,7 +24,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dis
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
 
-from .const import FLO_DOMAIN, ATTRIBUTION, SIGNAL_FLO_DATA_UPDATE
+from .const import FLO_DOMAIN, ATTRIBUTION, SIGNAL_FLO_DATA_UPDATE, ATTR_CACHE, ATTR_COORDINATOR
 
 from pyflowater import PyFlo
 
@@ -35,9 +36,6 @@ NOTIFICATION_ID = 'flo_notification'
 
 CONF_LOCATIONS = 'locations'
 CONF_LOCATION_ID = 'location_id'
-
-ATTR_CACHE = 'cache'
-ATTR_COORDINATOR = 'coordinator'
 
 # try to avoid DDoS Flo's cloud service
 SCAN_INTERVAL = timedelta(seconds=15)

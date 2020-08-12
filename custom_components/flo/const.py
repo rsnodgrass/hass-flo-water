@@ -6,3 +6,6 @@ FLO_DOMAIN = 'flo'
 ATTRIBUTION = "Data provided by Flo"
 
 SIGNAL_FLO_DATA_UPDATE = "flo_data_update_%s"
+
+ATTR_CACHE = 'cache'
+ATTR_COORDINATOR = 'coordinator'
