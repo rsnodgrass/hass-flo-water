@@ -16,7 +16,6 @@ from . import (
     FloDeviceEntity,
     FLO_DOMAIN,
     FLO_SERVICE,
-    FLO_CACHE,
     CONF_LOCATION_ID
 )
 
