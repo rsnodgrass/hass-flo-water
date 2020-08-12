@@ -182,10 +182,6 @@ class FloEntity(Entity):
                 unit = self.unit_of_measurement
             LOG.info(f"Updated {self.name} to {self.state} {unit}")
 
-    @callback
-    def _update_callback(self):
-        self.schedule_update_ha_state(force_refresh=True)
-
     # FIXME: we should be able to get rid of the signals for this...!!
     async def async_added_to_hass(self):
         """When entity is added to hass."""
