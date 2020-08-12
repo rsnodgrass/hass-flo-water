@@ -161,7 +161,7 @@ class FloEntity(Entity):
     @property
     def should_poll(self):
         """Flo update coordinator notifies through listener when data has been updated"""
-        return False
+        return True # FIXME: temporarily enable polling until coordinator triggers work
 
     @property
     def device_state_attributes(self):
