@@ -103,7 +103,7 @@ def setup(hass, config):
     # create sensors/switches for all configured locations
     for location_id in locations:
         discovery_info = { CONF_LOCATION_ID: location_id }
-        for component in ['sensor', 'switch', 'binary_sensor']:
+        for component in ['sensor', 'switch']:
             discovery.load_platform(
                 hass, component, FLO_DOMAIN, discovery_info, config)
 
