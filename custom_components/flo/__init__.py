@@ -116,17 +116,16 @@ def setup(hass, config):
     async def async_initialize_coordinator():
         coordinator = DataUpdateCoordinator(
             hass, LOG,
-            name=f"Flo Update Coordinator",
+            name=f"Flo Webservice",
             update_method=update_flo_data,
-            # Polling interval...will only be polled if there are subscribers.
+            # Set polling interval (will only be polled if there are subscribers)
             update_interval=conf[CONF_SCAN_INTERVAL]
         )
         hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = coordinator
         hass.loop.create_task(coordinator.async_request_refresh())
 
     # start the coordinator initialiation in the hass event loop
-    asyncio.run_coroutine_threadsafe(
-        async_initialize_coordinator(), hass.loop).result()
+    asyncio.run_coroutine_threadsafe(async_initialize_coordinator(), hass.loop).result()
 
     # create sensors/switches for all configured locations
     for location_id in locations:
@@ -185,7 +184,7 @@ class FloEntity(Entity):
     async def async_added_to_hass(self):
         self.async_on_remove(
             self._hass.data[FLO_DOMAIN][ATTR_COORDINATOR].async_add_listener(
-                self.async_write_ha_state
+                self.schedule_update_ha_state(force_refresh=True)
             )
         )
 
