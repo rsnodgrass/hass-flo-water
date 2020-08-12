@@ -99,49 +99,8 @@ def setup(hass, config):
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
-    # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
-    future = asyncio.run_coroutine_threadsafe( FloDataUpdateCoordinator.initialize(hass), hass.loop )
-    if future.result():
-        LOG.debug("Initialization of Flo coordinator complete")
-
-    # create sensors/switches for all configured locations
-    for location_id in locations:
-        discovery_info = { CONF_LOCATION_ID: location_id }
-        for component in ['sensor', 'switch']:
-            discovery.load_platform(
-                hass, component, FLO_DOMAIN, discovery_info, config)
-
-    return True
-
-
-class FloDataUpdateCoordinator(DataUpdateCoordinator):
-    @staticmethod
-    async def initialize(hass):
-        """Required since DataUpdateCoordinator constructor must be run in event loop (and platform is non-async)"""
-
-        # create coordinator that updates all location/device data from the Flo webservice
-        coordinator = hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = FloDataUpdateCoordinator(hass)
-        LOG.debug("Initialized the coordinator")
-
-        # fetch initial data so data is available immediately
-        await coordinator.async_refresh()
-        return coordinator
-
-    def __init__(self, hass):
-        super().__init__(
-            hass, LOG, name=FLO_DOMAIN, update_interval=SCAN_INTERVAL
-        )
-
-        self._hass = hass
-
-    async def _async_update_data(self):
-        LOG.debug("Calling sync executor self._update_data")
-        result = await self._hass.async_add_executor_job(self._update_data)
-        LOG.debug("Async coordinator update complete")
-
-    def _update_data(self):
-        LOG.debug(f"Coordinator calling Flo webservice for latest state")
-        flo = self._hass.data[FLO_SERVICE]
+    async def update_flo_data(self):
+        LOG.debug(f"Coordinator called to update state from Flo webservice")
 
         # clear the pyflowater internal cache to force a fresh webservice call
         flo.clear_cache()
@@ -162,8 +121,28 @@ class FloDataUpdateCoordinator(DataUpdateCoordinator):
                 # notify all entities using cached device data than an update occurred
                 async_dispatcher_send(self._hass, SIGNAL_FLO_DATA_UPDATE.format(device_id))
 
-        return True
+    # create the Flo service update coordinator
+    async def async_initialize_coordinator():
+        coordinator = DataUpdateCoordinator(
+            hass, LOG,
+            name=f"Flo Update Coordinator",
+            update_method=update_flo_data,
+            update_interval=timedelta(seconds=300),
+        )
+        hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = coordinator
+        hass.loop.create_task(coordinator.async_request_refresh())
 
+    hass.loop.create_task( async_initialize_coordinator )
+
+
+    # create sensors/switches for all configured locations
+    for location_id in locations:
+        discovery_info = { CONF_LOCATION_ID: location_id }
+        for component in ['sensor', 'switch']:
+            discovery.load_platform(
+                hass, component, FLO_DOMAIN, discovery_info, config)
+
+    return True
 
 
 class FloEntity(Entity):
