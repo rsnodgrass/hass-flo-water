@@ -29,7 +29,6 @@ LOG = logging.getLogger(__name__)
 
 FLO_DOMAIN = 'flo'
 FLO_SERVICE = 'flo_service'
-FLO_CACHE = 'flo_cache'
 
 NOTIFICATION_ID = 'flo_notification'
 
@@ -37,6 +36,9 @@ CONF_LOCATIONS = 'locations'
 CONF_LOCATION_ID = 'location_id'
 
 ATTRIBUTION = 'Data provided by Flo'
+
+ATTR_CACHE = 'cache'
+ATTR_COORDINATOR = 'coordinator'
 
 # try to avoid DDoS Flo's cloud service
 DEFAULT_SCAN_INTERVAL=15
@@ -70,8 +72,10 @@ def setup(hass, config):
         flo.save_password(password)
 
         hass.data[FLO_SERVICE] = flo
-        hass.data[FLO_CACHE] = {}
-        hass.data[FLO_DOMAIN] = {}
+        hass.data[FLO_DOMAIN] = {
+            ATTR_CACHE: {},
+            ATTR_COORDINATOR: None
+        }
 
     except (ConnectTimeout, HTTPError) as ex:
         LOG.error(f"Unable to connect to Flo service: {str(ex)}")
@@ -114,10 +118,12 @@ class FloDataUpdateCoordinator(DataUpdateCoordinator):
     @staticmethod
     async def initialize(hass):
         """Required since DataUpdateCoordinator constructor must be run in event loop (and platform is non-async)"""
-        # create coordinator to update data from Flo webservice and fetch initial data so data is available immediately
-        coordinator = FloDataUpdateCoordinator(hass)
-        hass.data[FLO_DOMAIN]['coordinator'] = coordinator
+
+        # create coordinator that updates all location/device data from the Flo webservice
+        coordinator = hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = FloDataUpdateCoordinator(hass)
         LOG.debug("Initialized the coordinator")
+
+        # fetch initial data so data is available immediately
         await coordinator.async_refresh()
         return coordinator
 
@@ -127,11 +133,11 @@ class FloDataUpdateCoordinator(DataUpdateCoordinator):
         )
 
         self._hass = hass
-        self._hass.data[FLO_CACHE] = {}
 
     async def _async_update_data(self):
         LOG.debug("Calling sync executor self._update_data")
-        await self._hass.async_add_executor_job(self._update_data)
+        result = await self._hass.async_add_executor_job(self._update_data)
+        LOG.debug("Async coordinator update complete")
 
     def _update_data(self):
         LOG.debug(f"Coordinator calling Flo webservice for latest state")
@@ -140,7 +146,7 @@ class FloDataUpdateCoordinator(DataUpdateCoordinator):
         # clear the pyflowater internal cache to force a fresh webservice call
         flo.clear_cache()
 
-        cache = self._hass.data[FLO_CACHE]
+        cache = self._hass.data[FLO_DOMAIN][ATTR_CACHE]
         for location in flo.locations():
             cache[location['id']] = location
 
@@ -198,6 +204,9 @@ class FloEntity(Entity):
     def state(self):
         return self._state
 
+    def update(self):
+        LOG.debug(f"update() function not implemented for {self.name}")
+
     def update_state(self, state):
         if state != self._state:
             self._state = state
@@ -226,7 +235,7 @@ class FloDeviceEntity(FloEntity):
     @property
     def device_state(self):
         """Get device data shared from the Flo update coordinator"""
-        return self._hass.data[FLO_CACHE].get(self._device_id)
+        return self._hass.data[FLO_DOMAIN][ATTR_CACHE].get(self._device_id)
 
     def get_telemetry(self, field):
         value = None
@@ -260,7 +269,7 @@ class FloLocationEntity(FloEntity):
     @property
     def location_state(self):
         """Get device data shared from the Flo update coordinator"""
-        return self._hass.data[FLO_CACHE].get(self._location_id)
+        return self._hass.data[FLO_DOMAIN][ATTR_CACHE].get(self._location_id)
 
     async def async_added_to_hass(self):
         """Run when entity is about to be added to hass."""

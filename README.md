@@ -54,7 +54,7 @@ flo:
   password: your_flo_password
 ```
 
-Advanced configuration to limit sensors to a single location (if multiple houses on a single account). The location_id can be found by turning logging to DEBUG for `pyflowater` component, or installing [`pyflowater`](https://github.com/rsnodgrass/pyflowater) and running the `example-client.py` script to show all information about your Flo devices.
+The following is an advanced configuration to limit sensors to a single location (if multiple houses on a single account). The location_id can be found by turning logging to DEBUG for `pyflowater` component, or installing [`pyflowater`](https://github.com/rsnodgrass/pyflowater) and running the `example-client.py` script to show all information about your Flo devices.
 
 ```yaml
 flo:
@@ -71,21 +71,23 @@ The following is a simplest Lovelace card which shows data from the Flo sensors:
 ```yaml
 type: entities
 entities:
-  - entity: sensor.flo_water_flow_rate
-  - entity: sensor.flo_water_pressure
-  - entity: sensor.flo_water_temperature
-  - entity: sensor.flo_water_consumption
+  - entity: sensor.water_flow_rate
+  - entity: sensor.water_pressure
+  - entity: sensor.water_temperature
+  - entity: sensor.daily_water_consumption
+  - entity: sensor.yearly_water_consumption
+  - entity: sensor.flo_monitoring_mode
 ```
 
 ![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/entities.png?raw=true)
 
-Alternatively, Lovelace example with gauges that turn colors when pressure or flow rate is high:
+Alternative Lovelace example with gauges that turn colors when pressure or flow rate is high:
 
 ```yaml
 cards:
   - type: gauge
     name: Water Pressure
-    entity: sensor.flo_water_pressure
+    entity: sensor.water_pressure
     max: 100
     severity:
       green: 0
@@ -93,7 +95,7 @@ cards:
       red: 80
   - type: gauge
     name: Flow Rate
-    entity: sensor.flo_water_flow_rate
+    entity: sensor.water_flow_rate
     max: 15
     severity:
       green: 0
@@ -101,7 +103,7 @@ cards:
       red: 12
   - type: gauge
     name: Temp
-    entity: sensor.flo_water_temperature
+    entity: sensor.water_temperature
     max: 75
 type: horizontal-stack
 ```

@@ -21,7 +21,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dis
 
 from pyflowater.const import FLO_MODES
 
-from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, FLO_CACHE, CONF_LOCATION_ID
+from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, CONF_LOCATION_ID
 
 LOG = logging.getLogger(__name__)
 
