@@ -41,7 +41,7 @@ ATTR_CACHE = 'cache'
 ATTR_COORDINATOR = 'coordinator'
 
 # try to avoid DDoS Flo's cloud service
-DEFAULT_SCAN_INTERVAL = timedelta(seconds=15)
+SCAN_INTERVAL = timedelta(seconds=15)
 
 SIGNAL_FLO_DATA_UPDATE = "flo_data_update_%s"
 
@@ -50,7 +50,7 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Required(CONF_USERNAME): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_LOCATIONS, default=[]): cv.ensure_list,
-        vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): cv.time_period,
+        vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -131,8 +131,8 @@ def setup(hass, config):
         hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = coordinator
         hass.loop.create_task(coordinator.async_request_refresh())
 
-    hass.loop.create_task( async_initialize_coordinator )
-
+    # start the coordinator initialiation in the hass event loop
+    asyncio.run_coroutine_threadsafe( async_initialize_coordinator(), hass.loop ).result()
 
     # create sensors/switches for all configured locations
     for location_id in locations:

@@ -2,7 +2,6 @@
 Support for Flo Water Control System inflow control device valve on/off
 """
 import logging
-import asyncio
 import voluptuous as vol
 from datetime import timedelta
 
