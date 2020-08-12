@@ -41,8 +41,7 @@ ATTR_CACHE = 'cache'
 ATTR_COORDINATOR = 'coordinator'
 
 # try to avoid DDoS Flo's cloud service
-DEFAULT_SCAN_INTERVAL=15
-SCAN_INTERVAL = timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+DEFAULT_SCAN_INTERVAL = timedelta(seconds=15)
 
 SIGNAL_FLO_DATA_UPDATE = "flo_data_update_%s"
 
@@ -127,7 +126,7 @@ def setup(hass, config):
             hass, LOG,
             name=f"Flo Update Coordinator",
             update_method=update_flo_data,
-            update_interval=timedelta(seconds=300),
+            update_interval=conf[CONF_SCAN_INTERVAL],
         )
         hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = coordinator
         hass.loop.create_task(coordinator.async_request_refresh())
