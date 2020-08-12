@@ -68,7 +68,6 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
         sensors.append( FloPhysicalValveSensor(hass, device_id))
-
         sensors.append( FloDailyConsumptionSensor(hass, device_id))
         sensors.append( FloYearlyConsumptionSensor(hass, device_id))
 
@@ -229,7 +228,7 @@ class FloYearlyConsumptionSensor(FloDeviceEntity):
         now = datetime.now()
         start_time = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
 
-        data = self.flo_service.consumption(self._device_id, startDate=start_time, interval='1d')
+        data = self.flo_service.consumption(self._device_id, startDate=start_time)
         if data:
             self.update_state( round(data['aggregations']['sumTotalGallonsConsumed'], 1) )
 

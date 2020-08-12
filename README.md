@@ -66,7 +66,7 @@ flo:
 
 ### Step 3: Add Lovelace Card
 
-The following is a simplest Lovelace card which shows data from the Flo sensors:
+The following is a simplest Lovelace card which shows data from the Flo sensors (adjust as needed to use your own entity_id names):
 
 ```yaml
 type: entities

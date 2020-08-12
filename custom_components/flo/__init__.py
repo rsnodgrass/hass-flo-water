@@ -18,16 +18,16 @@ from datetime import datetime, timedelta
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
-
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+import homeassistant.helpers.config_validation as cv
+
+from .const import FLO_DOMAIN, ATTRIBUTION, SIGNAL_FLO_DATA_UPDATE
 
 from pyflowater import PyFlo
 
 LOG = logging.getLogger(__name__)
 
-FLO_DOMAIN = 'flo'
 FLO_SERVICE = 'flo_service'
 
 NOTIFICATION_ID = 'flo_notification'
@@ -35,15 +35,11 @@ NOTIFICATION_ID = 'flo_notification'
 CONF_LOCATIONS = 'locations'
 CONF_LOCATION_ID = 'location_id'
 
-ATTRIBUTION = 'Data provided by Flo'
-
 ATTR_CACHE = 'cache'
 ATTR_COORDINATOR = 'coordinator'
 
 # try to avoid DDoS Flo's cloud service
 SCAN_INTERVAL = timedelta(seconds=15)
-
-SIGNAL_FLO_DATA_UPDATE = "flo_data_update_%s"
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
@@ -138,8 +134,7 @@ def setup(hass, config):
     for location_id in locations:
         discovery_info = { CONF_LOCATION_ID: location_id }
         for component in ['sensor', 'switch']:
-            discovery.load_platform(
-                hass, component, FLO_DOMAIN, discovery_info, config)
+            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True
 
@@ -170,13 +165,15 @@ class FloEntity(Entity):
         """Flo update coordinator notifies an update needs to occur via signal notifications (SIGNAL_FLO_DATA_UPDATE)"""
         return False
 
-    def _trigger_update_callback(self):
-        self.schedule_update_ha_state(force_refresh=True)
+    async def async_update(self):
+        await self._hass.data[FLO_DOMAIN][ATTR_COORDINATOR].async_request_refresh()
 
     @property
     def device_state_attributes(self):
         """Return the device state attributes."""
         return self._attrs
+
+# self._coordinator.data.current_weather_data.g
 
     @property
     def state(self):
