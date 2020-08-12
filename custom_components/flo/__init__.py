@@ -98,18 +98,18 @@ def setup(hass, config):
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
-    async def update_flo_data(self):
+    async def update_flo_data():
         LOG.debug(f"Coordinator called to update state from Flo webservice")
 
         # clear the pyflowater internal cache to force a fresh webservice call
         flo.clear_cache()
 
-        cache = self._hass.data[FLO_DOMAIN][ATTR_CACHE]
+        cache = hass.data[FLO_DOMAIN][ATTR_CACHE]
         for location in flo.locations():
             cache[location['id']] = location
 
             # notify all entities using cached location data than an update occurred
-            async_dispatcher_send(self._hass, SIGNAL_FLO_DATA_UPDATE.format(location['id']))
+            async_dispatcher_send(hass, SIGNAL_FLO_DATA_UPDATE.format(location['id']))
 
             # query Flo webservice for each of the devices
             devices = location.get('devices')
@@ -118,7 +118,7 @@ def setup(hass, config):
                 cache[device_id] = flo.device(device_id)
 
                 # notify all entities using cached device data than an update occurred
-                async_dispatcher_send(self._hass, SIGNAL_FLO_DATA_UPDATE.format(device_id))
+                async_dispatcher_send(hass, SIGNAL_FLO_DATA_UPDATE.format(device_id))
 
     # create the Flo service update coordinator
     async def async_initialize_coordinator():
