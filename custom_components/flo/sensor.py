@@ -67,7 +67,9 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloRateSensor(hass, device_id))
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
+
         sensors.append( FloDailyConsumptionSensor(hass, device_id))
+        sensors.append( FloYearlyConsumptionSensor(hass, device_id))
 
     # create location-based sensors
     # add sensor that tracks the current monitoring mode for a location
@@ -172,8 +174,6 @@ class FloPressureSensor(FloDeviceEntity):
 
 
 class FloDailyConsumptionSensor(FloDeviceEntity):
-    """Water consumption sensor for a Flo device"""
-
     def __init__(self, hass, device_id):
         super().__init__(hass, f"Daily Water Consumption", device_id)
         self._unique_id = f"flo_consumption_daily_{device_id}"
@@ -197,12 +197,45 @@ class FloDailyConsumptionSensor(FloDeviceEntity):
 
     def update(self):
         # default consumption from pyflowater is daily rollup
-        res = self.flo_service.consumption(self._device_id)
-        if not res:
-            LOG.error(f"Daily Flo consumption request failed!: %s", res)
-            return
-        
-        self.update_state( round(res['aggregations']['sumTotalGallonsConsumed'], 1) )
+        data = self.flo_service.consumption(self._device_id)
+        if data:
+            self.update_state( round(data['aggregations']['sumTotalGallonsConsumed'], 1) )
+
+    @property
+    def unique_id(self):
+        return self._unique_id
+
+class FloYearlyConsumptionSensor(FloDeviceEntity):
+    def __init__(self, hass, device_id):
+        super().__init__(hass, f"Yearly Water Consumption", device_id)
+        self._unique_id = f"flo_consumption_yearly_{device_id}"
+
+    @property
+    def should_poll(self):
+        # FIXME: need to set appropriate scan_intervals:
+        #  - "instananeous" = last minute consumption (every 60 seconds)
+        #  - daily (every 10 minutes)
+        #  - yearly (every hour)
+        return True
+
+    @property
+    def unit_of_measurement(self):
+        """gallons (g)"""
+        return "gallons"
+
+    @property
+    def icon(self):
+        return "mdi:gauge"
+
+    # FIXME: @Throttle
+    def update(self):
+        now = datetime.now()
+        if not start_time:
+            start_time = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
+
+        data = self.flo_service.consumption(self._device_id, startDate=start_time)
+        if data:
+            self.update_state( round(data['aggregations']['sumTotalGallonsConsumed'], 1) )
 
     @property
     def unique_id(self):
