@@ -227,8 +227,7 @@ class FloYearlyConsumptionSensor(FloDeviceEntity):
     # FIXME: @Throttle
     def update(self):
         now = datetime.now()
-        if not start_time:
-            start_time = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
+        start_time = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).replace(tzinfo=None)
 
         data = self.flo_service.consumption(self._device_id, startDate=start_time, interval='1d')
         if data:
