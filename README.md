@@ -132,6 +132,7 @@ Other ideas (no plans to add currently):
 - support leak detection sensitivity settings (all, small, bigger, biggest)
 - support FloSense alerts (leaks detected)
 - support Flo's fixtures beta feature breaking down usage by type (e.g. toilets, appliances, faucet, irrigation, etc)
+- leak detection sensitivity setting
 
 ## Automation Ideas
 

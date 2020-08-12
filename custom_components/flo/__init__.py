@@ -19,12 +19,13 @@ from datetime import datetime, timedelta
 from homeassistant.core import callback
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
-from homeassistant.const import (CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
+from homeassistant.const import (
+    CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
 
-from .const import FLO_DOMAIN, ATTRIBUTION, SIGNAL_FLO_DATA_UPDATE, ATTR_CACHE, ATTR_COORDINATOR
+from .const import FLO_DOMAIN, ATTRIBUTION, ATTR_CACHE, ATTR_COORDINATOR
 
 from pyflowater import PyFlo
 
@@ -48,6 +49,7 @@ CONFIG_SCHEMA = vol.Schema({
         vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
     })
 }, extra=vol.ALLOW_EXTRA)
+
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
@@ -85,17 +87,17 @@ def setup(hass, config):
     if not locations:
         for location in flo.locations():
             locations.append(location['id'])
-            LOG.info(f"Discovered Flo location {location['id']} ({location['nickname']})")
+            LOG.info(
+                f"Discovered Flo location {location['id']} ({location['nickname']})")
 
         if not locations:
-            LOG.error(f"No device locations returned from Flo service for user {username}")
+            LOG.error(
+                f"No device locations returned from Flo service for user {username}")
             return True
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
     async def update_flo_data():
-        LOG.debug(f"Coordinator called to update state from Flo webservice")
-
         # clear the pyflowater internal cache to force a fresh webservice call
         flo.clear_cache()
 
@@ -103,17 +105,12 @@ def setup(hass, config):
         for location in flo.locations():
             cache[location['id']] = location
 
-            # notify all entities using cached location data than an update occurred
-            async_dispatcher_send(hass, SIGNAL_FLO_DATA_UPDATE.format(location['id']))
-
             # query Flo webservice for each of the devices
             devices = location.get('devices')
             for device in devices:
                 device_id = device['id']
                 cache[device_id] = flo.device(device_id)
 
-                # notify all entities using cached device data than an update occurred
-                async_dispatcher_send(hass, SIGNAL_FLO_DATA_UPDATE.format(device_id))
 
     # create the Flo service update coordinator
     async def async_initialize_coordinator():
@@ -121,19 +118,22 @@ def setup(hass, config):
             hass, LOG,
             name=f"Flo Update Coordinator",
             update_method=update_flo_data,
-            update_interval=conf[CONF_SCAN_INTERVAL],
+            # Polling interval...will only be polled if there are subscribers.
+            update_interval=conf[CONF_SCAN_INTERVAL]
         )
         hass.data[FLO_DOMAIN][ATTR_COORDINATOR] = coordinator
         hass.loop.create_task(coordinator.async_request_refresh())
 
     # start the coordinator initialiation in the hass event loop
-    asyncio.run_coroutine_threadsafe( async_initialize_coordinator(), hass.loop ).result()
+    asyncio.run_coroutine_threadsafe(
+        async_initialize_coordinator(), hass.loop).result()
 
     # create sensors/switches for all configured locations
     for location_id in locations:
-        discovery_info = { CONF_LOCATION_ID: location_id }
+        discovery_info = {CONF_LOCATION_ID: location_id}
         for component in ['sensor', 'switch']:
-            discovery.load_platform(hass, component, FLO_DOMAIN, discovery_info, config)
+            discovery.load_platform(
+                hass, component, FLO_DOMAIN, discovery_info, config)
 
     return True
 
@@ -161,7 +161,7 @@ class FloEntity(Entity):
 
     @property
     def should_poll(self):
-        """Flo update coordinator notifies an update needs to occur via signal notifications (SIGNAL_FLO_DATA_UPDATE)"""
+        """Flo update coordinator notifies through listener when data has been updated"""
         return False
 
     @property
@@ -169,14 +169,9 @@ class FloEntity(Entity):
         """Return the device state attributes."""
         return self._attrs
 
-# self._coordinator.data.current_weather_data.g
-
     @property
     def state(self):
         return self._state
-
-    def update(self):
-        LOG.debug(f"update() function not implemented for {self.name}")
 
     def update_state(self, state):
         if state != self._state:
@@ -187,14 +182,18 @@ class FloEntity(Entity):
                 unit = self.unit_of_measurement
             LOG.info(f"Updated {self.name} to {self.state} {unit}")
 
-        # for debugging, mark last_updated with current timestamp
-        if self._attrs:
-            now = datetime.now()
-            self._attrs['last_updated'] = now.strftime("%m/%d/%Y %H:%M:%S")
-
     @callback
     def _update_callback(self):
         self.schedule_update_ha_state(force_refresh=True)
+
+    # FIXME: we should be able to get rid of the signals for this...!!
+    async def async_added_to_hass(self):
+        """When entity is added to hass."""
+        self.async_on_remove(
+            self._hass.data[FLO_DOMAIN][ATTR_COORDINATOR].async_add_listener(
+                self.async_write_ha_state
+            )
+        )
 
 
 class FloDeviceEntity(FloEntity):
@@ -205,7 +204,7 @@ class FloDeviceEntity(FloEntity):
         super().__init__(hass, name)
 
         self._device_id = device_id
-        self._attrs ['device_id'] = device_id
+        self._attrs['device_id'] = device_id
 
     @property
     def device_state(self):
@@ -222,13 +221,9 @@ class FloDeviceEntity(FloEntity):
                 value = current_states.get(field)
 
         if not value:
-            LOG.warning(f"Could not get current {field} from Flo telemetry: {self.device_state}")
+            LOG.warning(
+                f"Could not get current {field} from Flo telemetry: {self.device_state}")
         return value
-
-    async def async_added_to_hass(self):
-        """Run when entity is about to be added to hass."""
-        # register this entity to listen to updates for this device
-        async_dispatcher_connect( self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._device_id), self._update_callback)
 
 
 class FloLocationEntity(FloEntity):
@@ -245,8 +240,3 @@ class FloLocationEntity(FloEntity):
     def location_state(self):
         """Get device data shared from the Flo update coordinator"""
         return self._hass.data[FLO_DOMAIN][ATTR_CACHE].get(self._location_id)
-
-    async def async_added_to_hass(self):
-        """Run when entity is about to be added to hass."""
-        # register this entity to listen to updates for this location
-        async_dispatcher_connect(self.hass, SIGNAL_FLO_DATA_UPDATE.format(self._location_id), self._update_callback)
