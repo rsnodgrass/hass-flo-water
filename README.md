@@ -48,7 +48,9 @@ Please make sure to use one of the official release branches when installing usi
 
 Make sure that [Home Assistant Community Store (HACS)](https://github.com/custom-components/hacs) is setup, then add the "Integration" repository: `rsnodgrass/hass-flo-water`.
 
-### Step 2: Configure Sensors
+### Step 2: Configuration
+
+**DO NOT MANUALLY CONFIGURE SENSORS/SWITCHES, ONLY CONFIGURE USING `flo:` AS BELOW**. Configuration flow UI is being added in version 3.0 of this integration.
 
 Example configuration:
 
