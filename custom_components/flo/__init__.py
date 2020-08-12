@@ -20,7 +20,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (
-    CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
+    CONF_EMAIL, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
@@ -43,7 +43,7 @@ SCAN_INTERVAL = timedelta(seconds=30)
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
-        vol.Required(CONF_USERNAME): cv.string,
+        vol.Required(CONF_EMAIL): cv.string,
         vol.Required(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_LOCATIONS, default=[]): cv.ensure_list,
         vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
@@ -55,13 +55,13 @@ def setup(hass, config):
     """Set up the Flo Water Control System"""
 
     conf = config[FLO_DOMAIN]
-    username = conf.get(CONF_USERNAME)
+    email = conf.get(CONF_EMAIL)
     password = conf.get(CONF_PASSWORD)
 
     try:
-        flo = PyFlo(username, password)
+        flo = PyFlo(email, password)
         if not flo.is_connected:
-            LOG.error(f"Could not connect to Flo service with user {username}")
+            LOG.error(f"Could not connect to Flo service with {email}")
             return False
 
         # save password to enable automatic re-authentication while this HA instance is running
@@ -92,7 +92,7 @@ def setup(hass, config):
 
         if not locations:
             LOG.error(
-                f"No device locations returned from Flo service for user {username}")
+                f"No device locations returned from Flo service for {email}")
             return True
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")

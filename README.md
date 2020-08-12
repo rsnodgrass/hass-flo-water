@@ -2,8 +2,6 @@
 
 Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsnodgrass) for Home Assistant. [Flo](http://fbuy.me/v/rsnodgrass) is typically installed on the main water supply line and has sensors for flow rate, pressure, and temperature as well as shut off capabilities. Water shut off can be done manually, remotely, as well as automatically by Flo's emergency monitoring service when a leak is detected.
 
-**NOTE: FLO DOESN'T PROVIDE ANY OFFICIALLY SUPPORTED API, THUS THEIR CHANGES MAY BREAK HASS INTEGRATIONS AT ANY TIME.**
-
 ![beta_badge](https://img.shields.io/badge/maturity-Beta-yellow.png)
 ![release_badge](https://img.shields.io/github/v/release/rsnodgrass/hass-flo-water.svg)
 ![release_date](https://img.shields.io/github/release-date/rsnodgrass/hass-flo-water.svg)
@@ -11,6 +9,12 @@ Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsn
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/custom-components/hacs)
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=WREP29UDAMB6G)
+
+## IMPORTANT NOTES
+
+* **FLO DOESN'T PROVIDE ANY OFFICIALLY SUPPORTED API, THUS THEIR CHANGES MAY BREAK HASS INTEGRATIONS AT ANY TIME.**
+* Version 3.0 is a BREAKING CHANGE and requires specifying `email` key instead of `username` if you manually configure through configuration.yaml.
+* Version 3.0 is the first to offer configuration via the Home Assistant UI.
 
 ## Support
 
@@ -50,7 +54,7 @@ Example configuration:
 
 ```yaml
 flo:
-  username: your@email.com
+  email: your@email.com
   password: your_flo_password
 ```
 
@@ -58,7 +62,7 @@ The following is an advanced configuration to limit sensors to a single location
 
 ```yaml
 flo:
-  username: your@email.com
+  email: your@email.com
   password: your_flo_password
   locations:
     - d6b2822a-f2ce-44b0-bbe2-3600a095d494
