@@ -13,8 +13,7 @@ Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsn
 ## IMPORTANT NOTES
 
 * **FLO DOESN'T PROVIDE ANY OFFICIALLY SUPPORTED API, THUS THEIR CHANGES MAY BREAK HASS INTEGRATIONS AT ANY TIME.**
-* Version 3.0 is a BREAKING CHANGE and requires specifying `email` key instead of `username` if you manually configure through configuration.yaml.
-* Version 3.0 is the first to offer configuration via the Home Assistant UI.
+* **Version 3.x is a BREAKING CHANGE** and requires specifying `email` key instead of `username` (if you manually configure through configuration.yaml)
 
 ## Support
 
