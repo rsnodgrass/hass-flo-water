@@ -12,7 +12,7 @@ import time
 import logging
 import voluptuous as vol
 
-from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE, CONF_SCAN_INTERVAL, ATTR_ENTITY_ID
+from homeassistant.const import TEMP_FAHRENHEIT, ATTR_TEMPERATURE, CONF_SCAN_INTERVAL, ATTR_ENTITY_ID, DEVICE_CLASS_PRESSURE, DEVICE_CLASS_TEMPERATURE
 from homeassistant.helpers.entity import Entity
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.util import dt as dt_util
@@ -145,7 +145,12 @@ class FloTempSensor(FloDeviceEntity):
     def unique_id(self):
         return f"flo_temp_{self._device_id}"
 
+    @property
+    def device_class(self):
+        """Return the device class for this sensor."""
+        return DEVICE_CLASS_TEMPERATURE
 
+    
 class FloPressureSensor(FloDeviceEntity):
     """Water pressure sensor for a Flo device"""
 
@@ -172,6 +177,10 @@ class FloPressureSensor(FloDeviceEntity):
     def unique_id(self):
         return f"flo_pressure_{self._device_id}"
 
+    @property
+    def device_class(self):
+        """Return the device class for this sensor."""
+        return DEVICE_CLASS_PRESSURE
 
 class FloDailyConsumptionSensor(FloDeviceEntity):
     def __init__(self, hass, device_id):
