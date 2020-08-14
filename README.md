@@ -19,8 +19,6 @@ Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsn
 
 Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
 
-This integration was developed to cover use cases for my home integration, which I wanted to contribute back to the community. Additional features beyond what has already been provided are the responsibility of the community to implement (unless trivial to add).
-
 ### Supported Features
 
 - sensors:
