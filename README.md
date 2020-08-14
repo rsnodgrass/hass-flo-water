@@ -85,7 +85,6 @@ entities:
   - entity: sensor.water_pressure
   - entity: sensor.water_temperature
   - entity: sensor.daily_water_consumption
-  - entity: sensor.yearly_water_consumption
   - entity: sensor.flo_monitoring_mode
 ```
 
