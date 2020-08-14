@@ -1,5 +1,5 @@
 {
-  "name": "Flo by Moen Smart Water Detector",
+  "name": "Flo by Moen Smart Water Monitor",
   "domains": ["sensor", "switch"],
   "render_readme": true
 }

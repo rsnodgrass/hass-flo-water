@@ -1,6 +1,6 @@
 {
   "domain": "flo",
-  "name": "Flo by Moen Smart Water Detector",
+  "name": "Flo by Moen Smart Water Monitor",
   "documentation": "https://github.com/rsnodgrass/hass-flo-water/",
   "codeowners": ["@rsnodgrass", "@snicker", "@DubhAd"],
   "requirements": ["pyflowater>=0.4.1"],
