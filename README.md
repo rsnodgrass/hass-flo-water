@@ -1,4 +1,4 @@
-# Flo by Moen Water Monitoring & Control for Home Assistant
+# Flo by Moen Water Monitor for Home Assistant
 
 Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsnodgrass) for Home Assistant. [Flo](http://fbuy.me/v/rsnodgrass) is typically installed on the main water supply line and has sensors for flow rate, pressure, and temperature as well as shut off capabilities. Water shut off can be done manually, remotely, as well as automatically by Flo's emergency monitoring service when a leak is detected.
 
