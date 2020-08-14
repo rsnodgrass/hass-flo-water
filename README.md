@@ -67,6 +67,14 @@ flo:
     - d6b2822a-f2ce-44b0-bbe2-3600a095d494
 ```
 
+#### Alternative: Configure via UI
+
+With version 3.0, we added the ability to configure credentials for Flo through the Home Assistant UI. Go to Configuration -> Integrations and click the + symbol to configure. Search for Flo and enter your username and password.
+
+![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/Config-Flow-Add.png?raw=true)
+![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/Config-Flow-Card.png?raw=true)
+
+
 ### Step 3: Add Lovelace Card
 
 The following is a simplest Lovelace card which shows data from the Flo sensors (adjust as needed to use your own entity_id names):
