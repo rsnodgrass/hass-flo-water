@@ -20,7 +20,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import discovery
 from homeassistant.helpers.entity import Entity
 from homeassistant.const import (
-    CONF_EMAIL, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
+    CONF_EMAIL, CONF_USERNAME, CONF_PASSWORD, CONF_NAME, CONF_SCAN_INTERVAL, ATTR_ATTRIBUTION)
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 import homeassistant.helpers.config_validation as cv
@@ -43,10 +43,11 @@ SCAN_INTERVAL = timedelta(seconds=30)
 
 CONFIG_SCHEMA = vol.Schema({
     FLO_DOMAIN: vol.Schema({
-        vol.Required(CONF_EMAIL): cv.string,
+        vol.Optional(CONF_EMAIL): cv.string, # temp optional for backwards compatability
         vol.Required(CONF_PASSWORD): cv.string,
         vol.Optional(CONF_LOCATIONS, default=[]): cv.ensure_list,
         vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
+        vol.Required(CONF_USERNAME): cv.string, # backwards compatibility
     })
 }, extra=vol.ALLOW_EXTRA)
 
@@ -56,6 +57,10 @@ def setup(hass, config):
 
     conf = config[FLO_DOMAIN]
     email = conf.get(CONF_EMAIL)
+    if not email:
+        email = conf.get(CONF_USERNAME)
+        LOG.error(f"Deprecated {CONF_USERNAME} key used in flo: config, please change this to {CONF_EMAIL} as this will break in future releases!")
+
     password = conf.get(CONF_PASSWORD)
 
     try:
