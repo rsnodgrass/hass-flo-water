@@ -14,17 +14,13 @@ Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsn
 * **FLO DOESN'T PROVIDE ANY OFFICIALLY SUPPORTED API, THUS THEIR CHANGES MAY BREAK HASS INTEGRATIONS AT ANY TIME.**
 * **Version 3.x is a BREAKING CHANGE** and requires specifying `email` key instead of `username` (if you manually configure through configuration.yaml)
 
-## Support
-
-Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
-
-### Supported Features
+### Features
 
 - sensors:
     * water flow rate (gpm)
     * water pressure (psi)
     * water temperature (&deg;F)
-    * water consumption (g) - daily and yearly
+    * water consumption (g) - daily
 - services:
     * turn valve on/off
     * set monitoring mode (home, away, sleep)
@@ -32,6 +28,10 @@ Visit the Home Assistant community if you need [help with installation and confi
 - multiple Flo devices at single location
 - multiple locations with Flo devices and ability to restrict locations (for users with multiple houses or locations)
 - reduced polling of Flo webservice to avoid unintentional DDoS
+
+## Support
+
+Visit the Home Assistant community if you need [help with installation and configuration of Flo](https://community.home-assistant.io/t/flo-smart-water-leak-detector/119532).
 
 ## Installation
 
