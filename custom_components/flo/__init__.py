@@ -97,7 +97,10 @@ def setup(hass, config):
     else:
         LOG.info(f"Using manually configured Flo locations: {locations}")
 
-    async def update_flo_data():
+    async def async_update_flo_data():
+        await hass.async_add_executor_job(update_flo_data)
+
+    def update_flo_data():
         # clear the pyflowater internal cache to force a fresh webservice call
         flo.clear_cache()
 
@@ -117,7 +120,7 @@ def setup(hass, config):
         coordinator = DataUpdateCoordinator(
             hass, LOG,
             name=f"Flo Webservice",
-            update_method=update_flo_data,
+            update_method=async_update_flo_data,
             # Set polling interval (will only be polled if there are subscribers)
             update_interval=conf[CONF_SCAN_INTERVAL]
         )
@@ -142,6 +145,8 @@ class FloEntity(Entity):
 
     def __init__(self, hass, name):
         """Store service upon init."""
+        #super().(hass)
+        self.hass = hass
         self._hass = hass
         self._name = name
         self._state = None
@@ -180,6 +185,8 @@ class FloEntity(Entity):
             if self.unit_of_measurement:
                 unit = self.unit_of_measurement
             LOG.info(f"Updated {self.name} to {self.state} {unit}")
+
+        self.schedule_update_ha_state()
 
     async def async_added_to_hass(self):
         self.async_on_remove(

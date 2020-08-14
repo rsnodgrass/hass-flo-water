@@ -67,7 +67,7 @@ def setup_platform(hass, config, add_sensors_callback, discovery_info=None):
         sensors.append( FloRateSensor(hass, device_id))
         sensors.append( FloPressureSensor(hass, device_id))
         sensors.append( FloTempSensor(hass, device_id))
-        sensors.append( FloPhysicalValveSensor(hass, device_id))
+        #sensors.append( FloPhysicalValveSensor(hass, device_id))
         sensors.append( FloDailyConsumptionSensor(hass, device_id))
         sensors.append( FloYearlyConsumptionSensor(hass, device_id))
 
@@ -276,32 +276,3 @@ class FloMonitoringMode(FloLocationEntity):
     @property
     def unique_id(self):
         return f"flo_mode_{self._location_id}"
-    
-
-
-# pylint: disable=too-many-instance-attributes
-class FloPhysicalValveSensor(FloDeviceEntity):
-    """Current physical Flo valve position (may not match the Flo valve switch setting yet)"""
-
-    def __init__(self, hass, device_id):
-        super().__init__(hass, 'Flo Physical Valve', device_id)
-        self.update()
-
-    @property
-    def icon(self):
-        if self.state == 'Open':
-            return 'mdi:valve-open'
-        elif self.state == 'Closed':
-            return 'mdi:valve-closed'
-
-    def update(self):
-        """Update sensor state"""
-        if self.device_state:
-            valve = self.device_state.get('valve')
-            if not valve:
-                return
-            self.update_state( valve.get('lastKnown').capitalize() )
-
-    @property
-    def unique_id(self):
-        return f"flo_physical_valve_{self._device_id}"
