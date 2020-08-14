@@ -129,7 +129,7 @@ More complex cards can be created, for example the following shows both the basi
 
 ## Known Issues
 
-* **Flo has removed the water temperature reading as of June 2020; this is no longer available (replaced by "area temp")**
+* **Flo has removed the water temperature reading as of June 2020; this is no longer available (replaced by "area temp" which is not exposed through any known API at this time)**
 
 #### Feature Requests
 
