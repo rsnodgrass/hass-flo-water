@@ -10,7 +10,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
-from homeassistant.const import ATTR_ENTITY_ID
+from homeassistant.const import ATTR_ENTITY_ID, ICON_VALVE_OPEN, ICON_VALVE_CLOSED
 
 from . import (
     FloDeviceEntity,
@@ -83,11 +83,11 @@ class FloWaterValve(FloDeviceEntity, ToggleEntity):
     @property
     def icon(self):
         if self.state == STATE_OPEN:
-            return 'mdi:valve-open'
+            return ICON_VALVE_OPEN
         elif self.state == STATE_CLOSED:
-            return 'mdi:valve-closed'
+            return ICON_VALVE_CLOSED
         else:
-            return 'mdi:valve-open'
+            return ICON_VALVE_OPEN
 
     @property
     def is_on(self):

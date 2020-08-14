@@ -19,7 +19,7 @@ from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
-from pyflowater.const import FLO_MODES
+from pyflowater.const import FLO_MODES, ICON_FLOW_RATE, ICON_TEMP, ICON_CONSUMPTION, ICON_PRESSURE, ICON_MONITORING
 
 from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, CONF_LOCATION_ID
 
@@ -102,7 +102,7 @@ class FloRateSensor(FloDeviceEntity):
 
     @property
     def icon(self):
-        return 'mdi:water-pump'
+        return ICON_FLOW_RATE
 
     def update(self):
         """Update sensor state"""
@@ -128,7 +128,7 @@ class FloTempSensor(FloDeviceEntity):
 
     @property
     def icon(self):
-        return 'mdi:thermometer'
+        return ICON_TEMP
 
     def update(self):
         """Update sensor state"""
@@ -160,7 +160,7 @@ class FloPressureSensor(FloDeviceEntity):
 
     @property
     def icon(self):
-        return 'mdi:gauge'
+        return ICON_PRESSURE
 
     def update(self):
         """Update sensor state"""
@@ -191,7 +191,7 @@ class FloDailyConsumptionSensor(FloDeviceEntity):
 
     @property
     def icon(self):
-        return "mdi:gauge"
+        return ICON_CONSUMPTION
 
     def update(self):
         # default consumption from pyflowater is daily rollup
@@ -221,7 +221,7 @@ class FloYearlyConsumptionSensor(FloDeviceEntity):
 
     @property
     def icon(self):
-        return "mdi:gauge"
+        return ICON_CONSUMPTION
 
     # FIXME: @Throttle
     def update(self):
@@ -250,7 +250,7 @@ class FloMonitoringMode(FloLocationEntity):
 
     @property
     def icon(self):
-        return 'mdi:shield-search'
+        return ICON_MONITORING
 
     def update(self):
         """Update sensor state"""
