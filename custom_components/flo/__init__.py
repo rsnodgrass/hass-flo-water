@@ -55,7 +55,11 @@ CONFIG_SCHEMA = vol.Schema({
 def setup(hass, config):
     """Set up the Flo Water Control System"""
 
-    conf = config[FLO_DOMAIN]
+    conf = config.get(FLO_DOMAIN)
+    if not conf:
+        LOG.error(f"Configuration domain {FLO_DOMAIN} cannot be found in config, ignoring setup!")
+        return
+
     email = conf.get(CONF_EMAIL)
     if not email:
         email = conf.get(CONF_USERNAME)
