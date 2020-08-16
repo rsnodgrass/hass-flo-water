@@ -68,7 +68,9 @@ flo:
 
 #### Alternative: Configure via UI
 
-With version 3.0, we added the ability to configure credentials for Flo through the Home Assistant UI. Go to Configuration -> Integrations and click the + symbol to configure. Search for Flo and enter your username and password.
+**THE UI CONFIGURATION IS CURRENTLY DISABLED**
+
+Version 3.0 added the ability to configure credentials for Flo through the Home Assistant UI. Go to Configuration -> Integrations and click the + symbol to configure. Search for Flo and enter your username and password.
 
 ![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/Config-Flow-Add.png?raw=true)
 ![Flo Lovelace Examples](https://github.com/rsnodgrass/hass-flo-water/blob/master/lovelace/Config-Flow-Card.png?raw=true)
