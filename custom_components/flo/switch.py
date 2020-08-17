@@ -10,7 +10,8 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
-from homeassistant.const import ATTR_ENTITY_ID, ICON_VALVE_OPEN, ICON_VALVE_CLOSED
+from homeassistant.const import ATTR_ENTITY_ID
+from .const import ICON_VALVE_OPEN, ICON_VALVE_CLOSED
 
 from . import (
     FloDeviceEntity,
