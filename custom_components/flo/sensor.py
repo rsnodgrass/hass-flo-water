@@ -19,7 +19,8 @@ from homeassistant.util import dt as dt_util
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 
-from pyflowater.const import FLO_MODES, ICON_FLOW_RATE, ICON_TEMP, ICON_CONSUMPTION, ICON_PRESSURE, ICON_MONITORING
+from pyflowater.const import FLO_MODES
+from .const import ICON_FLOW_RATE, ICON_TEMP, ICON_CONSUMPTION, ICON_PRESSURE, ICON_MONITORING
 
 from . import FloEntity, FloDeviceEntity, FloLocationEntity, FLO_DOMAIN, FLO_SERVICE, CONF_LOCATION_ID
 
