@@ -30,6 +30,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_LOCATION_ID): cv.string
 })
 
+UNIT_GALLONS = 'g'
+UNIT_GALLONS_PER_MINUTE = 'gpm'
+UNIT_PSI = 'psi'
+
 ATTR_MODE = 'mode'
 
 SERVICE_SET_MODE = 'set_mode'
@@ -99,7 +103,7 @@ class FloRateSensor(FloDeviceEntity):
     @property
     def unit_of_measurement(self):
         """Gallons per minute (gpm)"""
-        return 'gpm'
+        return UNIT_GALLONS_PER_MINUTE
 
     @property
     def icon(self):
@@ -161,8 +165,7 @@ class FloPressureSensor(FloDeviceEntity):
 
     @property
     def unit_of_measurement(self):
-        """Pounds per square inch (psi)"""
-        return 'psi'
+        return UNIT_PSI
 
     @property
     def icon(self):
@@ -196,8 +199,7 @@ class FloDailyConsumptionSensor(FloDeviceEntity):
 
     @property
     def unit_of_measurement(self):
-        """gallons (g)"""
-        return "gallons"
+        return UNIT_GALLONS
 
     @property
     def icon(self):
@@ -226,8 +228,7 @@ class FloYearlyConsumptionSensor(FloDeviceEntity):
 
     @property
     def unit_of_measurement(self):
-        """gallons (g)"""
-        return "gallons"
+        return UNIT_GALLONS
 
     @property
     def icon(self):
