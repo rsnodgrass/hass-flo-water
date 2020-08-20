@@ -111,6 +111,7 @@ def setup(hass, config):
 
     def update_flo_data():
         # clear the pyflowater internal cache to force a fresh webservice call
+        flo = hass.data[FLO_SERVICE]
         flo.clear_cache()
 
         cache = hass.data[FLO_DOMAIN][ATTR_CACHE]
