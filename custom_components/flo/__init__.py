@@ -51,6 +51,8 @@ CONFIG_SCHEMA = vol.Schema({
     })
 }, extra=vol.ALLOW_EXTRA)
 
+async def async_setup_entry(hass, entry):
+    return
 
 def setup(hass, config):
     """Set up the Flo Water Control System"""
