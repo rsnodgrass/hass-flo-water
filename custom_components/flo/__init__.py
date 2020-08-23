@@ -232,7 +232,7 @@ class FloDeviceEntity(FloEntity):
                 current_states = telemetry.get('current')
                 value = current_states.get(field)
 
-        if not value:
+        if value == None:
             LOG.warning(
                 f"Could not get current {field} from Flo telemetry: {self.device_state}")
         return value
