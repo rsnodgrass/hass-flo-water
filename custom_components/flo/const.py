@@ -3,7 +3,7 @@
 FLO_DOMAIN = 'flo'
 
 # FIXME: translate?
-ATTRIBUTION = "Data provided by Flo"
+ATTRIBUTION = "Data by Flo"
 
 ATTR_CACHE = 'cache'
 ATTR_COORDINATOR = 'coordinator'
