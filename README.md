@@ -14,6 +14,8 @@ Support for [Flo Smart water monitoring and control device](http://fbuy.me/v/rsn
 
 The time has come to deprecate this integration as Home Assistant 115.0 that will be released September 17, 2020 will finally have a [native Flo by Moen integration](https://rc.home-assistant.io/integrations/flo/).
 
+**You can still buy your [Flo by Moen](http://fbuy.me/v/rsnodgrass) device direct!**
+
 ## IMPORTANT NOTES
 
 * **FLO DOESN'T PROVIDE ANY OFFICIALLY SUPPORTED API, THUS THEIR CHANGES MAY BREAK HASS INTEGRATIONS AT ANY TIME.**
