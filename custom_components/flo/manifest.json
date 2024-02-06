@@ -4,6 +4,6 @@
   "documentation": "https://github.com/rsnodgrass/hass-flo-water/",
   "codeowners": ["@rsnodgrass", "@snicker", "@DubhAd"],
   "requirements": ["pyflowater>=0.4.1"],
-  "dependencies": [],
+  "version": "3.0.5",
   "config_flow": false
 }
